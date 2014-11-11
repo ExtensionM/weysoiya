@@ -1,16 +1,21 @@
 ﻿.header{
     margin:0 inherit 0;
     color:#0094ff;
-    text-align:center;
     padding:2.5em 2em 0;
+    text-align:center;
 }
 #output{
-    margin:1em 0 0 0;
-
+    margin:1em 1em 1em 1em;
+    padding:5px;
     background-color:aqua;
 }
 h3.output{
     color:#0300ff;
     text-align:left;
-    margin:1em 0 0;
+    margin:1em 1em 1em 1em;
+    padding:10px;
+}
+.buttons{
+    text-align:center;
+    margin:10px;
 }
