@@ -10,6 +10,7 @@
     End Sub
 
     Private Sub Button_Click_1(sender As Object, e As RoutedEventArgs)
-
+        Dim wey As New WeySoiya
+        Me.Plain.Text = wey.GetPlainText(Me.Cipher.Text)
     End Sub
 End Class

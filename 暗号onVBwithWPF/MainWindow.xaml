@@ -12,8 +12,8 @@
             <RowDefinition Height="40px"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <TextBox x:Name="Plain" HorizontalAlignment="Stretch" TextWrapping="Wrap" Text="" VerticalAlignment="Stretch" Margin="10,10,10,0" Grid.ColumnSpan="2"/>
-        <TextBox x:Name="Cipher" HorizontalAlignment="Stretch" TextWrapping="Wrap" Text="" VerticalAlignment="Stretch" Margin="10,0,10,10" Grid.Row="2" Grid.ColumnSpan="2"/>
+        <TextBox x:Name="Plain" AcceptsReturn="True" HorizontalAlignment="Stretch" TextWrapping="Wrap" Text="" VerticalAlignment="Stretch" Margin="10,10,10,0" Grid.ColumnSpan="2"/>
+        <TextBox x:Name="Cipher" AcceptsReturn="True" HorizontalAlignment="Stretch" TextWrapping="Wrap" Text="" VerticalAlignment="Stretch" Margin="10,0,10,10" Grid.Row="2" Grid.ColumnSpan="2"/>
         <Button Content="Wey" HorizontalAlignment="Left" Margin="177,5,0,0" Grid.Row="1" VerticalAlignment="Top" Width="75" Height="30" Click="Button_Click"/>
         <Button Content="Soiya" HorizontalAlignment="Left" Margin="10,5,0,0" Grid.Row="1" VerticalAlignment="Top" Width="75" Height="30" Grid.Column="1" Click="Button_Click_1"/>
 

@@ -1,5 +1,7 @@
 ﻿Public Class WeySoiya
 
+    Public Shared len As Integer = 3
+
     Public Shared val() As String = {"うぇい", "そいや", "ウェイ", "ソイヤ"}
 
     Private Shared bits As Integer = 2
@@ -16,6 +18,35 @@
     ''' <returns>平文</returns>
     ''' <remarks></remarks>
     Public Function GetPlainText(Cipher As String) As String
+        Try
+            Dim bytes As New List(Of Byte)
+            Dim c As Integer = 0
+            While (c < Cipher.Length)
+                Dim b1 As Byte = 0, b2 As Byte = 0
+
+                For j As Integer = 0 To 7 Step bits
+                    Dim b As Integer = chk(Cipher.Substring(c, len))
+                    If b = -1 Then
+                        Return ""
+                    End If
+                    b1 = b1 Or (b << ((8 - bits) - j))
+                    c += len
+                Next
+                For j As Integer = 0 To 7 Step bits
+                    Dim b As Integer = chk(Cipher.Substring(c, len))
+                    If b = -1 Then
+                        Return ""
+                    End If
+                    b2 = b2 Or (b << ((8 - bits) - j))
+                    c += len
+                Next
+                bytes.Add(b2)
+                bytes.Add(b1)
+            End While
+            Return Text.Encoding.Unicode.GetString(bytes.ToArray)
+        Catch ex As Exception
+
+        End Try
         Return ""
     End Function
 
