@@ -1,4 +1,10 @@
-﻿function code() {
+﻿
+function outp_into_inp() {
+    var str = document.getElementById("output").innerHTML;
+    document.getElementById("input").value = str;
+}
+
+function code() {
     //暗号化
     document.getElementById("output").innerHTML = "";
     var a = document.getElementById("input").value;
