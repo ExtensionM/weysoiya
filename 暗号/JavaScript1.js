@@ -28,6 +28,7 @@ function decode() {
     for (var i = 0; i < a.length/24; i++) {
         int[i] = aa.slice(8 * i, 8 * i + 8);
         int[i] = parseInt(int[i], 4).toString(16);
+        int[i] = ("0000" + int[i]).slice(-4);
         int[i] = unescape("%u"+int[i]);
         document.getElementById("output").innerHTML += int[i];
     }
