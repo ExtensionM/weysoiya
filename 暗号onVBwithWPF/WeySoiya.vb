@@ -2,7 +2,8 @@
 
     Public Shared len As Integer = 3
 
-    Public Shared val() As String = {"うぇい", "そいや", "ウェイ", "ソイヤ"}
+    Public Shared val() As String =
+        {"うぇい", "そいや", "ウェイ", "ソイヤ"}
 
     Private Shared bits As Integer = 2
 
