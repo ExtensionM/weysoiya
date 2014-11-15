@@ -6,8 +6,7 @@
 function outp_copy() {
     var str = document.getElementById("output").innerHTML;
     str = str.replace(/<br>/g, "\n");
-    clipboardData.setData('text', str);
-
+    window.clipboardData.setData('text', str);
 }
 
 function code() {
@@ -45,6 +44,9 @@ function code() {
         }
         i++;
         if (i >= a.length) {
+            document.getElementById("outp_length").innerHTML =
+                document.getElementById("output").innerHTML.length;
+            //alert("完了");
             clearInterval(timer);
         }
     }, 0);
@@ -72,6 +74,9 @@ function decode() {
         }
         i++;
         if (i >= a.length / 24) {
+            document.getElementById("outp_length").innerHTML =
+                document.getElementById("output").innerHTML.length;
+            alert("完了");
             clearInterval(timer);
         }
     }, 0);
