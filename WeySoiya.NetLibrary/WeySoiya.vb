@@ -1,15 +1,35 @@
-﻿Public Class WeySoiya
+﻿Imports System.Runtime.InteropServices
+'<ClassInterface(ClassInterfaceType.None)>
+<ComVisible(True)>
+<ComClass(WeySoiya.ClassID, WeySoiya.InterfaceID, WeySoiya.EventsID)>
+Public Class WeySoiya
+    'Implements IWeySoiya
+#Region "COM GUID"
+
+    Public Const ClassID As String =
+        "2379828E-3BDC-4F4D-9334-D133D48F7DFC"
+
+    Public Const InterfaceID As String =
+        "32264AB0-F1A0-479B-9C1B-30A60C718C6E"
+
+    Public Const EventsID As String =
+        "8003629C-2D34-46B6-B18D-792A3A0E7668"
+
+#End Region
 
     Public Shared len As Integer = 3
 
     Public Shared val() As String =
-    {"ウェイ", "ソイヤ", "うぇい", "そいや", "ウェい", "ソイや", "ウぇイ", "ソぃヤ", "ウぇい", "ソいや", "うェイ", "そイヤ", "うぇイ", "そいヤ", "うェい", "そイや"}
+    {"ウェイ", "ソイヤ", "うぇい", "そいや",
+     "ウェい", "ソイや", "ウぇイ", "ソぃヤ",
+     "ウぇい", "ソいや", "うェイ", "そイヤ",
+     "うぇイ", "そいヤ", "うェい", "そイや"}
     '{"うぇい", "そいや", "ウェイ", "ソイヤ"}
 
     Private Shared bits As Integer = 4
 
     Public Sub New()
-
+        MyBase.New()
     End Sub
 
 
@@ -21,6 +41,7 @@
     ''' <remarks></remarks>
     Public Function GetPlainText(Cipher As String) As String
         Try
+
             Dim bytes As Byte()
             bytes = GetPlainBytes(Cipher)
             For i As Integer = 0 To bytes.Length - 1 Step 2
@@ -31,7 +52,7 @@
             Next
             Return Text.Encoding.Unicode.GetString(bytes)
         Catch ex As Exception
-            MsgBox(ex.Message)
+            'MsgBox(ex.Message)
         End Try
         Return ""
     End Function
@@ -115,3 +136,15 @@
 
 
 End Class
+
+#If False Then
+Public Interface IWeySoiya
+    Function GetPlainText(Cipher As String) As String
+    Function GetPlainBytes(Cipher As String) As Byte()
+    Function GetCipherText(Plain As String) As String
+    Function GetCipherText(Bytes As Byte()) As String
+
+
+End Interface
+#End If
+

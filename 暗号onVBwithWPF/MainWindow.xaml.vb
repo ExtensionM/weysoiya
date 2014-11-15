@@ -1,6 +1,6 @@
 ﻿Class MainWindow 
-    Dim TextConvert As New WeySoiya
-    Dim file As New WeySoiya
+    Dim TextConvert As New WeySoiya.WeySoiya
+    Dim file As New WeySoiya.WeySoiya
 
     Private Sub TextBox_TextChanged(sender As Object, e As TextChangedEventArgs)
 
@@ -15,7 +15,7 @@
     End Sub
 
     Private Sub Plain_TextChanged(sender As Object, e As TextChangedEventArgs) Handles Plain.TextChanged
-        Me.Cipher.Text = TextConvert.GetCipherText(Me.Plain.Text)
+        'Me.Cipher.Text = TextConvert.GetCipherText(Me.Plain.Text)
     End Sub
 
     Private Sub Button_Click_2(sender As Object, e As RoutedEventArgs)
