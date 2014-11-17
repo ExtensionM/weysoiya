@@ -3,9 +3,10 @@
     Public Shared len As Integer = 3
 
     Public Shared val() As String =
-        {"うぇい", "そいや", "ウェイ", "ソイヤ"}
+    {"ウェイ", "ソイヤ", "うぇい", "そいや", "ウェい", "ソイや", "ウぇイ", "ソぃヤ", "ウぇい", "ソいや", "うェイ", "そイヤ", "うぇイ", "そいヤ", "うェい", "そイや"}
+    '{"うぇい", "そいや", "ウェイ", "ソイヤ"}
 
-    Private Shared bits As Integer = 2
+    Private Shared bits As Integer = 4
 
     Public Sub New()
 
