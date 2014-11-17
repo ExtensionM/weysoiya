@@ -19,6 +19,13 @@ Public Class WeySoiya
 
     'Public maxLen As Integer = 5
 
+    Public Event EndedEvent(ByVal sender As WeySoiya, ByVal e As AsyncResultEventArgs)
+
+    Public Event ErrorEvent(ByVal sender As WeySoiya, ByVal e As AsyncResultEventArgs, ByVal ex As Exception)
+
+    Public Encode As System.Text.Encoding = Text.Encoding.Unicode
+
+
     Public val_() As String =
     {"ウェイ", "ソイヤ", "うぇい", "そいや",
      "ウェい", "ソイや", "ウぇイ", "ソぃヤ",
@@ -84,7 +91,7 @@ Public Class WeySoiya
                 bytes(i) = bytes(i + 1)
                 bytes(i + 1) = b
             Next
-            Return Text.Encoding.Unicode.GetString(bytes)
+            Return Encode.GetString(bytes)
         Catch ex As Exception
             'MsgBox(ex.Message)
         End Try
@@ -128,7 +135,7 @@ Public Class WeySoiya
     ''' <remarks></remarks>
     Public Function GetCipherText(Plain As String) As String
         Dim bytes As Byte()
-        bytes = Text.Encoding.Unicode.GetBytes(Plain)
+        bytes = Encode.GetBytes(Plain)
         For i As Integer = 0 To bytes.Length - 2 Step 2
             Dim b As Byte = bytes(i)
             bytes(i) = bytes(i + 1)
@@ -165,11 +172,9 @@ Public Class WeySoiya
     ''' </summary>
     ''' <param name="SrcPath">元のファイルのパス</param>
     ''' <param name="DestPath">変更先のファイルのパス</param>
-    ''' <param name="ConvertMode">読み込みの方法を選択できます</param>
-    ''' <param name="EndedSub">書き込み終了時に実行するメソッド</param>
     ''' <returns>成功時に0</returns>
     ''' <remarks></remarks>
-    Public Function GetCipherFile(SrcPath As String, DestPath As String, Optional ConvertMode As FileConvertMode = FileConvertMode.Async, Optional EndedSub As System.Threading.ThreadStart = Nothing) As String
+    Public Function GetCipherFile(SrcPath As String, DestPath As String) As String
         If (SrcPath = "" Or DestPath = "") Or (SrcPath = DestPath) Then
             Return "書き込み先のパスと読込元のパスが不正です"
         End If
@@ -196,46 +201,22 @@ Public Class WeySoiya
                 End If
                 Try
                     src = New IO.FileStream(SrcPath, IO.FileMode.Open, IO.FileAccess.Read)
-                    dest = New IO.StreamWriter(DestPath, False, System.Text.Encoding.Unicode)
+                    dest = New IO.StreamWriter(DestPath, False, Encode)
                 Catch ex As Exception
                     Return "ファイルを開けませんでした"
                 End Try
-                Select Case ConvertMode
-                    Case FileConvertMode.SyncFileToFile
-                        Dim l As Long = 0
-                        While l < src.Length
-                            Dim b As Byte = src.ReadByte()
-                            For i = 0 To 7 Step bits
-                                dest.Write(GetCipherBit(b, i))
-                            Next
-                            l += 1
-                        End While
-                        src.Close()
-                        dest.Close()
-                        src.Dispose()
-                        dest.Dispose()
-                    Case FileConvertMode.Async
-                        Dim th As New Threading.Thread(
-                            Sub()
-                                Dim l As Long = 0
-                                While l < src.Length
-                                    Dim b As Byte = src.ReadByte()
-                                    For i = 0 To 7 Step bits
-                                        dest.Write(GetCipherBit(b, i))
-                                    Next
-                                End While
-                                src.Close()
-                                dest.Close()
-                                src.Dispose()
-                                dest.Dispose()
-                                If EndedSub IsNot Nothing Then
-                                    EndedSub.Invoke()
-                                End If
-                            End Sub)
-                        th.Start()
-                    Case Else
-                        Return "変換モードが不正です"
-                End Select
+                Dim l As Long = 0
+                While l < src.Length
+                    Dim b As Byte = src.ReadByte()
+                    For i = 0 To 7 Step bits
+                        dest.Write(GetCipherBit(b, i))
+                    Next
+                    l += 1
+                End While
+                src.Close()
+                dest.Close()
+                src.Dispose()
+                dest.Dispose()
             Else
                 Return "書き込み先のフォルダが見つかりません"
             End If
@@ -247,26 +228,278 @@ Public Class WeySoiya
     End Function
 
     ''' <summary>
-    ''' ファイルの変換方法
+    ''' ファイルを非同期で読み取りウェイファイルに変換する
     ''' </summary>
-    ''' <remarks></remarks>
-    Enum FileConvertMode
+    ''' <param name="SrcPath">読み取り元のパス</param>
+    ''' <param name="DestPath">書き込み先のパス</param>
+    ''' <returns>書き込み結果のオブジェクト</returns>
+    ''' <remarks>書き込み終了時、エラー時にイベントを起こします</remarks>
+    Public Function GetCipherFileAsync(SrcPath As String, DestPath As String) As AsyncResult
+        Dim Result = New AsyncResult
+        If (SrcPath = "" Or DestPath = "") Or (SrcPath = DestPath) Then
+            Result.ErrorMessage = "書き込み先のパスと読込元のパスが不正です"
+            Result.ErrorState = True
+            Return Result
+        End If
+        If My.Computer.FileSystem.FileExists(SrcPath) Then
+            '読み込むファイルが存在する
+            Dim src As IO.Stream = Nothing
+            Dim dest As IO.StreamWriter = Nothing
+
+            If DestPath.IndexOf("\") = -1 Then
+                'ファイルのパスでない
+                Result.ErrorMessage = "書き込み先のパスが不正です"
+                Result.ErrorState = True
+                Return Result
+            End If
+            If My.Computer.FileSystem.DirectoryExists(DestPath.Substring(0, DestPath.LastIndexOf("\"))) Then
+                '書き込むファイルのフォルダが存在する
+                If My.Computer.FileSystem.FileExists(DestPath) Then
+                    '書き込み先のファイルが存在する
+                    If MsgBox("書き込み先のファイル「" & DestPath & "」を上書きします。" &
+                              vbNewLine & "よろしいですか?",
+                              MsgBoxStyle.YesNo + MsgBoxStyle.Question) = MsgBoxResult.No Then
+                        '上書きしない
+                        Result.ErrorMessage = "上書きを中止しました"
+                        Result.ErrorState = True
+                        Return Result
+                    End If
+
+                Else
+                    '書き込み先のファイルを新規作成する
+                End If
+                Try
+                    src = New IO.FileStream(SrcPath, IO.FileMode.Open, IO.FileAccess.Read)
+                    dest = New IO.StreamWriter(DestPath, False, Encode)
+                Catch ex As Exception
+                    Result.ErrorMessage = "ファイルを開けませんでした"
+                    Result.ErrorState = True
+                    Return Result
+                End Try
+                Dim th As New Threading.Thread(
+                           Sub()
+                               Try
+                                   Dim l As Long = 0
+                                   Result.Tasks = src.Length
+                                   While l < src.Length
+                                       Dim b As Byte = src.ReadByte()
+                                       For i = 0 To 7 Step bits
+                                           dest.Write(GetCipherBit(b, i))
+                                       Next
+                                       l += 1
+                                       Result.Progress = l
+                                   End While
+                                   src.Close()
+                                   dest.Close()
+                                   src.Dispose()
+                                   dest.Dispose()
+                                   Result.Ended = True
+                                   RaiseEvent EndedEvent(Me, New AsyncResultEventArgs(SrcPath, DestPath))
+                                   Return
+                               Catch ex As Exception
+                                   Try
+                                       src.Close()
+                                       dest.Close()
+                                   Catch ex2 As Exception
+                                       src.Dispose()
+                                       dest.Dispose()
+                                   End Try
+                                   Result.ErrorMessage = ex.Message
+                                   Result.ErrorState = True
+                                   RaiseEvent ErrorEvent(Me, New AsyncResultEventArgs(SrcPath, DestPath), ex)
+                               End Try
+                           End Sub)
+                th.Start()
+            Else
+                Result.ErrorMessage = "書き込み先のフォルダが見つかりません"
+                Result.ErrorState = True
+                Return Result
+            End If
+        Else
+            Result.ErrorMessage = "読込元のファイルがありません"
+            Result.ErrorState = True
+            Return Result
+        End If
+
+        Return Result
+    End Function
+
+    'Private Function GetCipherFileAsync_(SrcPath As String, DestPath As String) As AsyncResult
+    '    Dim Result = New AsyncResult
+    '    If (SrcPath = "" Or DestPath = "") Or (SrcPath = DestPath) Then
+    '        Return "書き込み先のパスと読込元のパスが不正です"
+    '    End If
+    '    If My.Computer.FileSystem.FileExists(SrcPath) Then
+    '        '読み込むファイルが存在する
+    '        Dim src As IO.Stream = Nothing
+    '        Dim dest As IO.StreamWriter = Nothing
+    '        If DestPath.IndexOf("\") = -1 Then
+    '            'ファイルのパスでない
+    '            Return "書き込み先のパスが不正です"
+    '        End If
+    '        If My.Computer.FileSystem.DirectoryExists(DestPath.Substring(0, DestPath.LastIndexOf("\"))) Then
+    '            '書き込むファイルのフォルダが存在する
+    '            If My.Computer.FileSystem.FileExists(DestPath) Then
+    '                '書き込み先のファイルが存在する
+    '                If MsgBox("書き込み先のファイル「" & DestPath & "」を上書きします。" &
+    '                          vbNewLine & "よろしいですか?",
+    '                          MsgBoxStyle.YesNo + MsgBoxStyle.Question) = MsgBoxResult.No Then
+    '                    '上書きしない
+    '                    Return "上書きを中止しました"
+    '                End If
+    '            Else
+    '                '書き込み先のファイルを新規作成する
+    '            End If
+    '            Try
+    '                src = New IO.FileStream(SrcPath, IO.FileMode.Open, IO.FileAccess.Read)
+    '                dest = New IO.StreamWriter(DestPath, False, Encode)
+    '            Catch ex As Exception
+    '                Return "ファイルを開けませんでした"
+    '            End Try
+    '            Dim th As New Threading.Thread(
+    '                       Sub()
+    '                           Dim l As Long = 0
+    '                           While l < src.Length
+    '                               Dim b As Byte = src.ReadByte()
+    '                               For i = 0 To 7 Step bits
+    '                                   dest.Write(GetCipherBit(b, i))
+    '                               Next
+    '                           End While
+    '                           src.Close()
+    '                           dest.Close()
+    '                           src.Dispose()
+    '                           dest.Dispose()
+    '                       End Sub)
+    '            th.Start()
+    '        Else
+    '            Return "書き込み先のフォルダが見つかりません"
+    '        End If
+    '    Else
+    '        Return "読込元のファイルがありません"
+    '    End If
+
+    '    Return ""
+    'End Function
+
+    Public Class AsyncResult
+
+        Private Ended_ As Boolean
         ''' <summary>
-        ''' ファイルからファイルへ
+        ''' 終了状態
         ''' </summary>
+        ''' <value></value>
+        ''' <returns></returns>
         ''' <remarks></remarks>
-        SyncFileToFile
-        ' ''' <summary>
-        ' ''' 全てのデータをメモリに格納してから変換
-        ' ''' </summary>
-        ' ''' <remarks></remarks>
-        'SyncAllBytes
+        Public Property Ended() As Boolean
+            Get
+                Return Ended_
+            End Get
+            Set(ByVal value As Boolean)
+                Ended_ = value
+            End Set
+        End Property
+
+        Private ErrorMessage_ As String
         ''' <summary>
-        ''' 非同期でファイルからファイルへ
+        ''' エラーメッセージ
         ''' </summary>
+        ''' <value></value>
+        ''' <returns></returns>
         ''' <remarks></remarks>
-        Async
-    End Enum
+        Public Property ErrorMessage() As String
+            Get
+                Return ErrorMessage_
+            End Get
+            Set(ByVal value As String)
+                ErrorMessage_ = value
+            End Set
+        End Property
+
+        Private Progress_ As Long
+        ''' <summary>
+        ''' 変換し終わった量
+        ''' </summary>
+        ''' <value></value>
+        ''' <returns></returns>
+        ''' <remarks></remarks>
+        Public Property Progress() As Long
+            Get
+                Return Progress_
+            End Get
+            Set(ByVal value As Long)
+                Progress_ = value
+            End Set
+        End Property
+
+        Private Tasks_ As Long
+        ''' <summary>
+        ''' 変換する量
+        ''' </summary>
+        ''' <value></value>
+        ''' <returns></returns>
+        ''' <remarks></remarks>
+        Public Property Tasks() As Long
+            Get
+                Return Tasks_
+            End Get
+            Set(ByVal value As Long)
+                Tasks_ = value
+            End Set
+        End Property
+
+        Private ErrorState_ As Boolean
+        ''' <summary>
+        ''' エラーの状態
+        ''' </summary>
+        ''' <value></value>
+        ''' <returns></returns>
+        ''' <remarks></remarks>
+        Public Property ErrorState() As Boolean
+            Get
+                Return ErrorState_
+            End Get
+            Set(ByVal value As Boolean)
+                ErrorState_ = value
+            End Set
+        End Property
+
+    End Class
+
+    Public Class AsyncResultEventArgs
+        Inherits EventArgs
+        Private SourcePath_ As String
+        ''' <summary>
+        ''' 読み込み元のファイル
+        ''' </summary>
+        ''' <value></value>
+        ''' <returns></returns>
+        ''' <remarks></remarks>
+        Public ReadOnly Property SourcePath() As String
+            Get
+                Return SourcePath_
+            End Get
+        End Property
+
+        Private DestinationPath_ As String
+        ''' <summary>
+        ''' 書き込み先のファイル
+        ''' </summary>
+        ''' <value></value>
+        ''' <returns></returns>
+        ''' <remarks></remarks>
+        Public ReadOnly Property DestinationPath() As String
+            Get
+                Return DestinationPath_
+            End Get
+        End Property
+
+        Public Sub New(Src As String, Dest As String)
+            SourcePath_ = Src
+            DestinationPath_ = Dest
+        End Sub
+
+
+    End Class
 
 
     ''' <summary>
