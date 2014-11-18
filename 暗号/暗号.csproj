@@ -69,6 +69,7 @@
     <Content Include="JavaScript1.js" />
     <Content Include="style.css" />
     <Content Include="Web.config" />
+    <Content Include="Wey.js" />
     <Content Include="weysoiya.js" />
   </ItemGroup>
   <ItemGroup>
