@@ -80,10 +80,20 @@
         'Else
         '    MsgBox("ファイルが見つかりません")
         'End If
-        Dim t3 = file.GetCipherFile(t, t2, WeySoiyaLib.WeySoiya.FileConvertMode.SyncFileToFile)
-        If t3 <> "" Then
-            MsgBox(t3)
+        Dim async = file.GetCipherFileAsync(t, t2)
+        If async.ErrorState Then
+            MsgBox(async.ErrorMessage)
+        Else
+            AddHandler file.EndedEvent,
+                Sub(sender As WeySoiyaLib.WeySoiya, e As WeySoiyaLib.WeySoiya.AsyncResultEventArgs)
+                    MsgBox("Ended")
+                End Sub
+            AddHandler file.ErrorEvent,
+                Sub(sender As WeySoiyaLib.WeySoiya, e As WeySoiyaLib.WeySoiya.AsyncResultEventArgs, ex As Exception)
+                    MsgBox(ex.Message)
+                End Sub
         End If
+
     End Sub
 
     Public Sub Wey2TextFile()
@@ -129,5 +139,13 @@
         Tab1.Items(1).IsSelected = True
         Me.CipherMode.IsChecked = False
         Me.PlaneMode.IsChecked = False
+    End Sub
+
+    Private Sub Button_Click_1(sender As Object, e As RoutedEventArgs)
+        '入力ファイルを参照
+    End Sub
+
+    Private Sub Button_Click_2(sender As Object, e As RoutedEventArgs)
+        '出力ファイルを参照
     End Sub
 End Class
