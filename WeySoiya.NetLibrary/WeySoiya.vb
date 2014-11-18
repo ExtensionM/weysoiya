@@ -23,7 +23,7 @@ Public Class WeySoiya
 
     Public Event ErrorEvent(ByVal sender As WeySoiya, ByVal e As AsyncResultEventArgs, ByVal ex As Exception)
 
-    Public Encode As System.Text.Encoding = Text.Encoding.Unicode
+    Public Encode As System.Text.Encoding = Text.Encoding.BigEndianUnicode
 
 
     Public val_() As String =
@@ -38,7 +38,7 @@ Public Class WeySoiya
     ''' </summary>
     ''' <value>配列</value>
     ''' <remarks></remarks>
-    Public Property val As String()
+    Public Property Val As String()
         Set(ByVal value As String())
             For i As Integer = 0 To 3
                 If value.Length = 2 ^ (2 ^ i) Then
@@ -85,12 +85,6 @@ Public Class WeySoiya
 
             Dim bytes As Byte()
             bytes = GetPlainBytes(Cipher)
-            For i As Integer = 0 To bytes.Length - 2 Step 2
-                Dim b As Byte
-                b = bytes(i)
-                bytes(i) = bytes(i + 1)
-                bytes(i + 1) = b
-            Next
             Return Encode.GetString(bytes)
         Catch ex As Exception
             'MsgBox(ex.Message)
@@ -136,11 +130,6 @@ Public Class WeySoiya
     Public Function GetCipherText(Plain As String) As String
         Dim bytes As Byte()
         bytes = Encode.GetBytes(Plain)
-        For i As Integer = 0 To bytes.Length - 2 Step 2
-            Dim b As Byte = bytes(i)
-            bytes(i) = bytes(i + 1)
-            bytes(i + 1) = b
-        Next
         Return GetCipherText(bytes)
     End Function
 
@@ -511,7 +500,7 @@ Public Class WeySoiya
     Private Function chkAll(txt As String) As Integer
         Dim l As Integer = 0
         chkAll = -1
-        For i As Integer = 0 To val.Length - 1
+        For i As Integer = 0 To Val.Length - 1
             If txt.StartsWith(val(i)) Then
                 If l < val(i).Length Then
                     chkAll = i
@@ -529,7 +518,7 @@ Public Class WeySoiya
     ''' <remarks></remarks>
     Private Function chk(txt As String) As Integer
         Dim l As Integer = 0
-        For i As Integer = 0 To val.Length
+        For i As Integer = 0 To Val.Length
             If txt.StartsWith(val(i)) Then
                 Return i
             End If
