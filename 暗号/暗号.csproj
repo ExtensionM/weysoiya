@@ -66,7 +66,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="index.html" />
-    <Content Include="JavaScript1.js" />
     <Content Include="style.css" />
     <Content Include="Web.config" />
     <Content Include="Wey.js" />
