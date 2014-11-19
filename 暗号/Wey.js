@@ -29,22 +29,22 @@
         var REKey = new Array();
         var num;
         if (type == 0) {
-            num = 2;
+            num = (this.wey2.length-1).toString(2).length;
             Key = this.wey2.slice();
             REKey = this.REwey2.slice();
         }
         else if (type == 1) {
-            num = 4;
+            num = (this.wey4.length - 1).toString(2).length;
             Key = this.wey4.slice();
             REKey = this.REwey4.slice();
         }
         else if (type == 3) {
-            num = 1;
+            num = (this.grass.length - 1).toString(2).length;
             Key = this.grass.slice();
             REKey = this.REgrass.slice();
         }
         else if (type == 4) {
-            num = 2;
+            num = (this.MM.length - 1).toString(2).length;
             Key = this.MM.slice();
             REKey = this.REMM.slice();
         }
@@ -114,27 +114,36 @@
             REKey = this.REMM.slice();
         }
         document.getElementById("message").innerHTML = "変換中…";
+        var F = false;
+        var j = 0;
         var i = 0, timer = setInterval(function () {
-            int[i] = string.slice(Key[0].length * 16 / num * i, Key[0].length * 16 / num * (i + 1));
-            for (var j = 0; j < REKey.length; j++) {
-                int[i] = int[i].replace(REKey[j], j.toString(16));
+            if (!F) {
+                string = string.replace(REKey[j], j.toString(16));
+                j++;
+                if (j >= REKey.length) {
+                    F = true;
+                }
             }
-            if (int[i] == mypow("0", num)) {
-                //改行
-                int[i] = "<br>";
-                document.getElementById("output").innerHTML += int[i];
-            }
-            else {
-                int[i] = parseInt(int[i], Math.pow(2, num)).toString(16);
-                int[i] = unescape("%u" + ("0000" + int[i]).slice(-4));
-                document.getElementById("output").innerHTML += int[i];
-            }
-            i++;
-            if (i >= string.length / Key[0].length / 16 * num) {
-                document.getElementById("outp_length").innerHTML =
-                    document.getElementById("output").innerHTML.length;
-                document.getElementById("message").innerHTML = "変換完了";
-                clearInterval(timer);
+            else if (F) {
+                int[i] = string.slice(16 / num * i, 16 / num * (i + 1));
+                if (int[i] == mypow("0", num)) {
+                    //改行
+                    int[i] = "<br>";
+                    document.getElementById("output").innerHTML += int[i];
+                }
+                else {
+                    int[i] = parseInt(int[i], Math.pow(2, num)).toString(16);
+                    int[i] = unescape("%u" + ("0000" + int[i]).slice(-4));
+                    document.getElementById("output").innerHTML += int[i];
+                }
+                i++;
+                if (i >= string.length / 16 * num) {
+                    document.getElementById("outp_length").innerHTML =
+                        document.getElementById("output").innerHTML.length;
+                    document.getElementById("message").innerHTML = "変換完了";
+                    clearInterval(timer);
+                }
+
             }
         }, 0);
     }
