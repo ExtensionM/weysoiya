@@ -23,6 +23,8 @@ Public Class WeySoiya
 
     Public Event ErrorEvent(ByVal sender As WeySoiya, ByVal e As AsyncResultEventArgs, ByVal ex As Exception)
 
+    Public Shared Setting As New WeySoiyaSettings
+
     Public Encode As System.Text.Encoding = Text.Encoding.BigEndianUnicode
 
 
@@ -34,7 +36,7 @@ Public Class WeySoiya
     '{"うぇい", "そいや", "ウェイ", "ソイヤ"}
 
     ''' <summary>
-    ''' 文字列の書き換え(書き込み専用)
+    ''' 文字列の一覧
     ''' </summary>
     ''' <value>配列</value>
     ''' <remarks></remarks>

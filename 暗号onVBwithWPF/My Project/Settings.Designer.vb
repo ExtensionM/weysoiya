@@ -64,6 +64,30 @@ Partial Friend NotInheritable Class MySettings
             Me("Encoding") = value
         End Set
     End Property
+    
+    <Global.System.Configuration.UserScopedSettingAttribute(),  _
+     Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+     Global.System.Configuration.DefaultSettingValueAttribute("WeySoiya")>  _
+    Public Property Translate() As String
+        Get
+            Return CType(Me("Translate"),String)
+        End Get
+        Set
+            Me("Translate") = value
+        End Set
+    End Property
+    
+    <Global.System.Configuration.UserScopedSettingAttribute(),  _
+     Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+     Global.System.Configuration.DefaultSettingValueAttribute("4")>  _
+    Public Property Bits() As Byte
+        Get
+            Return CType(Me("Bits"),Byte)
+        End Get
+        Set
+            Me("Bits") = value
+        End Set
+    End Property
 End Class
 
 Namespace My

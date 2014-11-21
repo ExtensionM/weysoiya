@@ -5,5 +5,11 @@
     <Setting Name="Encoding" Type="System.Byte" Scope="User">
       <Value Profile="(Default)">2</Value>
     </Setting>
+    <Setting Name="Translate" Type="System.String" Scope="User">
+      <Value Profile="(Default)">WeySoiya</Value>
+    </Setting>
+    <Setting Name="Bits" Type="System.Byte" Scope="User">
+      <Value Profile="(Default)">4</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

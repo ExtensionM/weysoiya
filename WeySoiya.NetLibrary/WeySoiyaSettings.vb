@@ -62,6 +62,7 @@
     End Property
 
 
+
 End Class
 
 
@@ -152,7 +153,22 @@ Public Class TextSet
     ''' </summary>
     ''' <param name="Name"></param>
     ''' <remarks></remarks>
-    Public Sub New(Name As String)
+    Public Sub New(Name As String, FileName As String)
         Me.Name_ = Name
+        Me.FileName_ = FileName
     End Sub
+
+    Private FileName_ As String
+    ''' <summary>
+    ''' このテキストセットのソースファイルを記憶しています
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public ReadOnly Property FileName() As String
+        Get
+            Return FileName_
+        End Get
+    End Property
+
 End Class

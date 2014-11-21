@@ -17,8 +17,8 @@
     <Grid x:Name="ParentGrid">
 
         <Grid.ColumnDefinitions>
-            <ColumnDefinition x:Name="WorkerGridWidth" Width="0*"/>
-            <ColumnDefinition x:Name="SettingGridWidth" Width="*"/>
+            <ColumnDefinition x:Name="WorkerGridWidth" Width="*"/>
+            <ColumnDefinition x:Name="SettingGridWidth" Width="0*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -86,11 +86,10 @@
                 <ColumnDefinition Width="2*"/>
             </Grid.ColumnDefinitions>
             <ListBox HorizontalAlignment="Stretch" Margin="10,33,10,0" VerticalAlignment="Stretch">
+                <sys:String>UTF8</sys:String>
                 <sys:String>UTF16Big</sys:String>
                 <sys:String>UTF16Little</sys:String>
-                <sys:String>UTF8</sys:String>
                 <sys:String>UTF32</sys:String>
-                <sys:String>S-JIS</sys:String>
             </ListBox>
             <TextBlock HorizontalAlignment="Center" Margin="62,10,63,0" TextWrapping="Wrap" Text="文字コード" VerticalAlignment="Top" Height="18" Width="60"/>
             <Button Content="設定終了" HorizontalAlignment="Left" Margin="10,0,0,10" VerticalAlignment="Bottom" Width="75" Click="Button_Click_5" Grid.Row="2" Height="24"/>
@@ -99,9 +98,9 @@
             <ListView Grid.Column="1" HorizontalAlignment="Stretch"  Margin="10,33,10,0" VerticalAlignment="Stretch" Grid.RowSpan="2">
 
             </ListView>
-            <TextBlock HorizontalAlignment="Center" Margin="159,10,159,0" TextWrapping="Wrap" Text="インポート・エクスポート" VerticalAlignment="Top" Grid.ColumnSpan="3" Grid.Row="2" Height="18" Width="144"/>
-            <TextBlock Grid.Column="2" HorizontalAlignment="Center" Margin="81,10,80,0" TextWrapping="Wrap" Text="一覧" VerticalAlignment="Top" Height="18" Width="24"/>
-            <StackPanel HorizontalAlignment="Center" Height="24" Margin="151,0,151,10" VerticalAlignment="Bottom" Grid.ColumnSpan="3" Orientation="Horizontal" Grid.Row="2" Width="160" >
+            <TextBlock HorizontalAlignment="Center" Margin="0,10,0,0" TextWrapping="Wrap" Text="インポート・エクスポート" VerticalAlignment="Top" Grid.ColumnSpan="3" Grid.Row="2" Height="18" Width="144"/>
+            <TextBlock Grid.Column="2" HorizontalAlignment="Center" Margin="0,10,0,0" TextWrapping="Wrap" Text="一覧" VerticalAlignment="Top" Height="18" Width="24"/>
+            <StackPanel HorizontalAlignment="Center" Height="24" Margin="0,0,0,10" VerticalAlignment="Bottom" Grid.ColumnSpan="3" Orientation="Horizontal" Grid.Row="2" Width="160" >
                 <Button Content="インポート" Width="75"/>
                 <Button Content="エクスポート" Width="75" Margin="10,0,0,0"/>
             </StackPanel>
@@ -115,47 +114,12 @@
 
 
         </Grid>
-        <Grid HorizontalAlignment="Stretch" Grid.Row="1" Grid.ColumnSpan="2" VerticalAlignment="Stretch" Background="#FFF1EDED">
+        <Grid HorizontalAlignment="Stretch" Grid.Row="1" Grid.ColumnSpan="2" VerticalAlignment="Stretch" Background="#FFF1EDED" Margin="0,1,0,0">
+            <TextBlock x:Name="MsgTextBlock1" HorizontalAlignment="Left" Margin="10,0,0,0" TextWrapping="Wrap" VerticalAlignment="Center"/>
+            <TextBlock x:Name="MsgTextBlock2" HorizontalAlignment="Right" Margin="0,0,120,0" Text="" TextWrapping="Wrap" VerticalAlignment="Center"/>
+            <ProgressBar x:Name="Progress" HorizontalAlignment="Right" Height="14" Margin="0,0,10,0" VerticalAlignment="Center" Width="100"/>
 
         </Grid>
-        <Rectangle Fill="#FF919191" HorizontalAlignment="Stretch" Grid.Row="1" VerticalAlignment="Top" StrokeThickness="0" Height="1"/>
-
+        <Rectangle Fill="#FF919191" HorizontalAlignment="Stretch" Grid.Row="1" Grid.ColumnSpan="2" VerticalAlignment="Top" StrokeThickness="0" Height="1"/>
     </Grid>
-
-    <!--<Grid>
-        <TabControl SelectedIndex="1">
-            <TabItem Header="text">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="40px"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <TextBox x:Name="Plain" AcceptsReturn="True" HorizontalAlignment="Stretch" TextWrapping="Wrap" Text="" VerticalAlignment="Stretch" Margin="10,10,10,0" Grid.ColumnSpan="2"/>
-                    <TextBox x:Name="Cipher" AcceptsReturn="True" HorizontalAlignment="Stretch" TextWrapping="Wrap" Text="" VerticalAlignment="Stretch" Margin="10,0,10,10" Grid.Row="2" Grid.ColumnSpan="2"/>
-                    <Button Content="Wey" HorizontalAlignment="Right" Margin="0,5,10,0" Grid.Row="1" VerticalAlignment="Top" Width="75" Height="30" Click="Button_Click"/>
-                    <Button Content="Soiya" HorizontalAlignment="Left" Margin="10,5,0,0" Grid.Row="1" VerticalAlignment="Top" Width="75" Height="30" Grid.Column="1" Click="Button_Click_1"/>
-                </Grid>
-            </TabItem>
-            <TabItem Header="file">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBox x:Name="OriginFile" VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="10,10,100,0" Grid.ColumnSpan="2"></TextBox>
-                    <TextBox x:Name="WeySoiyaFile" VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="12,39,103,0" Grid.ColumnSpan="2"></TextBox>
-                    <Button Content="File" HorizontalAlignment="Left" Margin="155,10,0,0" VerticalAlignment="Top" Width="85" Height="24" Grid.Column="1"/>
-                    <Button Content="WeySoiyaFile" HorizontalAlignment="Left" Margin="155,39,0,0" VerticalAlignment="Top" Width="85" Height="24" Grid.Column="1"/>
-                    <TextBox x:Name="Output" HorizontalAlignment="Stretch" Margin="10,97,10,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="179" Grid.ColumnSpan="2"/>
-                    <Button Content="Wey" HorizontalAlignment="Right" Margin="0,68,10,0" VerticalAlignment="Top" Width="75" Click="Button_Click_2"/>
-                    <Button Content="Soiya" HorizontalAlignment="Left" Margin="10,68,0,0" VerticalAlignment="Top" Width="75"  Grid.Column="1" Click="Button_Click_3"/>
-                </Grid>
-            </TabItem>
-        </TabControl>
-    </Grid>-->
 </Window>
