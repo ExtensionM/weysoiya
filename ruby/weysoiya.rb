@@ -1,16 +1,13 @@
 # weysoiya converter
 
 #initilaize 
-i = 0
 @array = ["ウェイ","ソイヤ","うぇい","そいや",
 		 "ウェい","ソイや","ウぇイ","ソぃヤ",
 		 "ウぇい","ソいや","うェイ","そイヤ",
 		 "うぇイ","そいヤ","うェい","そイや"]
 
-puts "Please Input Some Words"
-#get words 
-text = gets.chomp
 def encode(text)
+	i = 0
   text = text.encode("UTF-8")
 	#文字ごとに文字コードを取得
   text.each_codepoint { |cp| 
@@ -18,7 +15,7 @@ def encode(text)
 	 	code = cp.to_s(16)
 		#16進数に変換したものを一桁ずつweysoiyaに変換する
 		while i < code.length 
-	  	print array[code[i].to_i(16)]
+	  	print @array[code[i].to_i(16)]
 	  	i+=1
 		end
 		i = 0
@@ -55,4 +52,17 @@ def decode(text)
     end
 	end
 end
-decode(text)
+
+puts "Do you want encode ? [y/n]"
+ans = gets.chomp
+if ans == "y"
+	puts "Please Input Text"
+	text = gets.chomp
+	encode(text)
+elsif ans == "n"
+	puts "Please Input WeySoiya"
+	text = gets.chomp
+	decode(text)
+else
+	"See you."
+end
