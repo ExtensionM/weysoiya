@@ -47,6 +47,23 @@
         UTF32
     End Enum
 
+    Private SettingNo_ As Integer = 0
+    Public Property SettingNo() As Integer
+        Get
+            Return SettingNo_
+        End Get
+        Set(ByVal value As Integer)
+            SettingNo_ = value
+        End Set
+    End Property
+
+
+    Public ReadOnly Property Texts As String()
+        Get
+            Return TextSets(SettingNo).Strings
+        End Get
+    End Property
+
 
     Private TextSets_ As New List(Of TextSet)
     ''' <summary>

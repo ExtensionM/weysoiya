@@ -166,6 +166,15 @@ Class MainWindow
     Private Async Sub Button_Click_5(sender As Object, e As RoutedEventArgs)
         If Not moving Then
             moving = True
+            WeySoiya.Setting.SetEncoding(Me.EncordType.SelectedIndex)
+            For i As Integer = 0 To WeySoiya.Setting.TextSets.Count - 1
+                If (WeySoiya.Setting.TextSets(i).Name = Me.Languages.SelectedValue) And
+                    Convert.ToByte(CType(Me.Patterns.SelectedValue, String).Substring(0, 3)) =
+                    WeySoiya.Setting.TextSets(i).Strings.Count Then
+                    WeySoiya.Setting.SettingNo = i
+                End If
+            Next
+
             Await Task.Run(Sub() BackFromSetting())
             moving = False
         End If
@@ -226,35 +235,26 @@ Class MainWindow
 
     Private Async Sub MainWindow_Loaded(sender As Object, e As RoutedEventArgs) Handles Me.Loaded
         Await Task.Run(Sub() LoadFiles())
-        Dim ErrorRised As Boolean = False
-        With WeySoiya.Setting.TextSets
-            For i As Integer = 0 To .Count - 2
-                If .Item(i).Name.Replace(" ", "").Replace(vbTab, "") = "" Then
-                    MsgBox("wssファイルの設定が不正です" & vbNewLine &
-                           "名前が空白もしくは空です" & vbNewLine &
-                           "Path = " & """" & .Item(i).FileName & """" & vbNewLine &
-                           "Name = " & """" & .Item(i).Name & """")
-                    ErrorRised = True
-                End If
-                For j As Integer = i + 1 To .Count - 1
-                    If .Item(i).Name = .Item(j).Name Then
-                        If .Item(i).Bits = .Item(j).Bits Then
-                            MsgBox("wssファイルの設定が不正です" & vbNewLine &
-                                   "同じ名前、同じパターン数のものが存在します" & vbNewLine &
-                                   "Path = " & """" & .Item(i).FileName & """ = """ & .Item(j).FileName & """" & vbNewLine &
-                                   "Name = " & """" & .Item(i).Name & """" & vbNewLine &
-                                   "パターン数 = " & .Item(i).Strings.Length)
-                            ErrorRised = True
+        With WeySoiya.Setting
+            If .TextSets.Count = 0 Then
+                MsgBox("データがありません")
+            Else
+                Dim langs As New List(Of String)
+                For Each ts In .TextSets
+                    Dim NeedAdd As Boolean = True
+                    For Each lang In langs
+                        If lang = ts.Name Then
+                            NeedAdd = False
                         End If
+                    Next
+                    If NeedAdd Then
+                        langs.Add(ts.Name)
+                        Me.Languages.Items.Add(ts.Name)
                     End If
                 Next
-            Next
-            If ErrorRised Then
-                Me.Close()
             End If
-
-
         End With
+
 
     End Sub
 
@@ -284,8 +284,75 @@ Class MainWindow
                     End Try
                 End If
             Next
+
+            Dim ErrorRised As Boolean = False
+            With WeySoiya.Setting.TextSets
+                For i As Integer = 0 To .Count - 2
+                    If .Item(i).Name.Replace(" ", "").Replace(vbTab, "") = "" Then
+                        MsgBox("wssファイルの設定が不正です" & vbNewLine &
+                               "名前が空白もしくは空です" & vbNewLine &
+                               "Path = " & """" & .Item(i).FileName & """" & vbNewLine &
+                               "Name = " & """" & .Item(i).Name & """")
+                        ErrorRised = True
+                    End If
+                    For j As Integer = i + 1 To .Count - 1
+                        If .Item(i).Name = .Item(j).Name Then
+                            If .Item(i).Bits = .Item(j).Bits Then
+                                MsgBox("wssファイルの設定が不正です" & vbNewLine &
+                                       "同じ名前、同じパターン数のものが存在します" & vbNewLine &
+                                       "Path = " & """" & .Item(i).FileName & """ = """ & .Item(j).FileName & """" & vbNewLine &
+                                       "Name = " & """" & .Item(i).Name & """" & vbNewLine &
+                                       "パターン数 = " & .Item(i).Strings.Length)
+                                ErrorRised = True
+                            End If
+                        End If
+                    Next
+                Next
+                If ErrorRised Then
+                    Me.Dispatcher.Invoke(Sub() Me.Close())
+                End If
+
+
+            End With
+
         Catch ex As Exception
 
         End Try
+    End Sub
+
+    Private Sub Languages_SelectionChanged(sender As Object, e As SelectionChangedEventArgs) Handles Languages.SelectionChanged
+
+        With Me.Languages
+            Dim st As String = .SelectedValue()
+            Me.Patterns.Items.Clear()
+            Me.LanguagePreView.Items.Clear()
+            For Each ts In WeySoiya.Setting.TextSets
+                If (ts.Name = st) Then
+                    Me.Patterns.Items.Add(String.Format("{0,3}", ts.Strings.Count()) & "パターン")
+                End If
+            Next
+            Me.Patterns.SelectedIndex = 0
+        End With
+    End Sub
+
+    Private Sub Patterns_SelectionChanged(sender As Object, e As SelectionChangedEventArgs) Handles Patterns.SelectionChanged
+        With Me.LanguagePreView
+            If Me.Patterns.SelectedIndex = -1 Then
+                Return
+            End If
+
+            .Items.Clear()
+            For Each ts In WeySoiya.Setting.TextSets
+                If (Me.Languages.SelectedValue = ts.Name) AndAlso
+                    (Convert.ToByte(CType(Me.Patterns.SelectedValue, String).Substring(0, 3)) = ts.Strings.Count) Then
+                    For Each st In ts.Strings
+                        .Items.Add(st)
+                    Next
+                End If
+
+            Next
+
+
+        End With
     End Sub
 End Class
