@@ -23,7 +23,14 @@ Public Class WeySoiya
 
     Public Event ErrorEvent(ByVal sender As WeySoiya, ByVal e As AsyncResultEventArgs, ByVal ex As Exception)
 
-    Public Encode As System.Text.Encoding = Text.Encoding.BigEndianUnicode
+    Public Shared Setting As New WeySoiyaSettings
+
+    Public ReadOnly Property Encode() As Text.Encoding
+        Get
+            Return Setting.Encoding
+        End Get
+    End Property
+
 
 
     Public val_() As String =
@@ -34,40 +41,43 @@ Public Class WeySoiya
     '{"うぇい", "そいや", "ウェイ", "ソイヤ"}
 
     ''' <summary>
-    ''' 文字列の書き換え(書き込み専用)
+    ''' 文字列の一覧
     ''' </summary>
     ''' <value>配列</value>
     ''' <remarks></remarks>
-    Public Property Val As String()
-        Set(ByVal value As String())
-            For i As Integer = 0 To 3
-                If value.Length = 2 ^ (2 ^ i) Then
-                    val_ = value
-                    bits = 2 ^ i
-                    Return
-                End If
-            Next
-            Throw New Exception("対応していない項目数です")
-        End Set
+    Public ReadOnly Property Val As String()
+        'Set(ByVal value As String())
+        '    For i As Integer = 0 To 3
+        '        If value.Length = 2 ^ (2 ^ i) Then
+        '            val_ = value
+        '            Bits = 2 ^ i
+        '            Return
+        '        End If
+        '    Next
+        '    Throw New Exception("対応していない項目数です")
+        'End Set
         Get
-            Return val_
+            Return Setting.Texts
         End Get
     End Property
-    ''' <summary>
-    ''' 文字列(読み込み専用)
-    ''' </summary>
-    ''' <param name="index">n番目の値</param>
-    ''' <value>文字列</value>
-    ''' <returns></returns>
-    ''' <remarks></remarks>
-    Public ReadOnly Property val(index As Integer) As String
+    ' ''' <summary>
+    ' ''' 文字列(読み込み専用)
+    ' ''' </summary>
+    ' ''' <param name="index">n番目の値</param>
+    ' ''' <value>文字列</value>
+    ' ''' <returns></returns>
+    ' ''' <remarks></remarks>
+    'Public ReadOnly Property val(index As Integer) As String
+    '    Get
+    '        Return Setting.Texts(index)
+    '    End Get
+    'End Property
+
+    Private ReadOnly Property Bits()
         Get
-            Return val_(index)
+            Return Setting.TextSets(Setting.SettingNo).Bits
         End Get
     End Property
-
-
-    Private bits As Integer = 4
 
     Public Sub New()
         MyBase.New()

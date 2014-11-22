@@ -47,6 +47,23 @@
         UTF32
     End Enum
 
+    Private SettingNo_ As Integer = 0
+    Public Property SettingNo() As Integer
+        Get
+            Return SettingNo_
+        End Get
+        Set(ByVal value As Integer)
+            SettingNo_ = value
+        End Set
+    End Property
+
+
+    Public ReadOnly Property Texts As String()
+        Get
+            Return TextSets(SettingNo).Strings
+        End Get
+    End Property
+
 
     Private TextSets_ As New List(Of TextSet)
     ''' <summary>
@@ -60,6 +77,7 @@
             Return TextSets_
         End Get
     End Property
+
 
 
 End Class
@@ -152,7 +170,22 @@ Public Class TextSet
     ''' </summary>
     ''' <param name="Name"></param>
     ''' <remarks></remarks>
-    Public Sub New(Name As String)
+    Public Sub New(Name As String, FileName As String)
         Me.Name_ = Name
+        Me.FileName_ = FileName
     End Sub
+
+    Private FileName_ As String
+    ''' <summary>
+    ''' このテキストセットのソースファイルを記憶しています
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public ReadOnly Property FileName() As String
+        Get
+            Return FileName_
+        End Get
+    End Property
+
 End Class
