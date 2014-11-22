@@ -65,14 +65,14 @@ Partial Friend NotInheritable Class MySettings
         End Set
     End Property
     
-    <Global.System.Configuration.UserScopedSettingAttribute(), _
-     Global.System.Diagnostics.DebuggerNonUserCodeAttribute(), _
-     Global.System.Configuration.DefaultSettingValueAttribute("WeySoiya")> _
+    <Global.System.Configuration.UserScopedSettingAttribute(),  _
+     Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+     Global.System.Configuration.DefaultSettingValueAttribute("WeySoiya")>  _
     Public Property Language() As String
         Get
-            Return CType(Me("Language"), String)
+            Return CType(Me("Language"),String)
         End Get
-        Set(value As String)
+        Set
             Me("Language") = value
         End Set
     End Property

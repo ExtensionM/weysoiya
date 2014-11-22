@@ -17,8 +17,8 @@
     <Grid x:Name="ParentGrid">
 
         <Grid.ColumnDefinitions>
-            <ColumnDefinition x:Name="WorkerGridWidth" Width="0*"/>
-            <ColumnDefinition x:Name="SettingGridWidth" Width="*"/>
+            <ColumnDefinition x:Name="WorkerGridWidth" Width="*"/>
+            <ColumnDefinition x:Name="SettingGridWidth" Width="0*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -83,7 +83,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="185"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <ListBox x:Name="EncordType" HorizontalAlignment="Stretch" Margin="10,33,10,0" VerticalAlignment="Stretch" SelectedIndex="0">
                 <sys:String>UTF8</sys:String>

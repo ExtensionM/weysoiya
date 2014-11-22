@@ -154,8 +154,6 @@ Class MainWindow
 
     Private Async Sub Button_Click_4(sender As Object, e As RoutedEventArgs)
         '設定表示
-        'CType(Me.Resources("SettingShow"), System.Windows.Media.Animation.Storyboard).Begin()
-
         If Not moving Then
             moving = True
             Await Task.Run(Sub() GoToSetting())
@@ -164,22 +162,27 @@ Class MainWindow
     End Sub
 
     Private Async Sub Button_Click_5(sender As Object, e As RoutedEventArgs)
-        If Not moving Then
-            moving = True
-            WeySoiya.Setting.SetEncoding(Me.EncordType.SelectedIndex)
-            For i As Integer = 0 To WeySoiya.Setting.TextSets.Count - 1
-                If (WeySoiya.Setting.TextSets(i).Name = Me.Languages.SelectedValue) And
-                    Convert.ToByte(CType(Me.Patterns.SelectedValue, String).Substring(0, 3)) =
-                    WeySoiya.Setting.TextSets(i).Strings.Count Then
-                    WeySoiya.Setting.SettingNo = i
-                End If
-            Next
+        With WeySoiya.Setting
+            If Not moving Then
+                moving = True
+                .SetEncoding(Me.EncordType.SelectedIndex)
+                My.Settings.Encoding = Me.EncordType.SelectedIndex
+                For i As Integer = 0 To .TextSets.Count - 1
+                    If (.TextSets(i).Name = Me.Languages.SelectedValue) And
+                        Convert.ToByte(CType(Me.Patterns.SelectedValue, String).Substring(0, 3)) =
+                        .TextSets(i).Strings.Count Then
+                        .SettingNo = i
+                        My.Settings.Bits = .TextSets(.SettingNo).Bits
+                        My.Settings.Language = .TextSets(.SettingNo).Name
+                    End If
+                Next
 
-            Await Task.Run(Sub() BackFromSetting())
-            moving = False
-        End If
+                Await Task.Run(Sub() BackFromSetting())
+                moving = False
+            End If
+        End With
     End Sub
-
+    '設定画面へ遷移する
     Private Sub GoToSetting()
         Dim d As Double = 0
         Dim time As New Stopwatch
@@ -202,6 +205,7 @@ Class MainWindow
         End While
         Me.WorkerGridWidth.Dispatcher.Invoke(Sub() Me.WorkerGridWidth.Width = New GridLength(0, GridUnitType.Star))
     End Sub
+    '設定画面から戻る
     Private Sub BackFromSetting()
         Dim d As Double = 0
         Dim time As New Stopwatch
@@ -223,6 +227,10 @@ Class MainWindow
         Me.WorkerGridWidth.Dispatcher.Invoke(Sub() Me.WorkerGridWidth.Width = New GridLength(1, GridUnitType.Star))
     End Sub
 
+    Private Sub MainWindow_Closed(sender As Object, e As EventArgs) Handles Me.Closed
+        My.Settings.Save()
+    End Sub
+
     Private Sub MainWindow_Initialized(sender As Object, e As EventArgs) Handles Me.Initialized
         If 4 < My.Settings.Encoding Then
             My.Settings.Encoding = WeySoiyaSettings.EncodeKind.UTF16B
@@ -238,6 +246,8 @@ Class MainWindow
         With WeySoiya.Setting
             If .TextSets.Count = 0 Then
                 MsgBox("データがありません")
+                Me.Close()
+                Return
             Else
                 Dim langs As New List(Of String)
                 For Each ts In .TextSets
@@ -254,6 +264,32 @@ Class MainWindow
                 Next
             End If
         End With
+        Me.EncordType.SelectedIndex = My.Settings.Encoding
+        If Me.Languages.Items.Contains(My.Settings.Language) Then
+            Me.Languages.SelectedValue = My.Settings.Language
+            Languages_SelectionChanged(Me.Languages, Nothing)
+            If Me.Patterns.Items.Contains(String.Format("{0,3}" & "パターン", 2 ^ My.Settings.Bits)) Then
+                Me.Patterns.SelectedValue = String.Format("{0,3}" & "パターン", 2 ^ My.Settings.Bits)
+                Patterns_SelectionChanged(Me.Patterns, Nothing)
+            Else
+                Me.Patterns.SelectedIndex = 0
+                Patterns_SelectionChanged(Me.Patterns, Nothing)
+            End If
+        Else
+            Me.Languages.SelectedIndex = 0
+            Languages_SelectionChanged(Me.Languages, Nothing)
+            Me.Patterns.SelectedIndex = 0
+            Patterns_SelectionChanged(Me.Patterns, Nothing)
+        End If
+
+        WeySoiya.Setting.SetEncoding(Me.EncordType.SelectedIndex)
+        For i As Integer = 0 To WeySoiya.Setting.TextSets.Count - 1
+            If (WeySoiya.Setting.TextSets(i).Name = Me.Languages.SelectedValue) And
+                Convert.ToByte(CType(Me.Patterns.SelectedValue, String).Substring(0, 3)) =
+                WeySoiya.Setting.TextSets(i).Strings.Count Then
+                WeySoiya.Setting.SettingNo = i
+            End If
+        Next
 
 
     End Sub
