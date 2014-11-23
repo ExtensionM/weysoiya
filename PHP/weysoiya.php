@@ -5,14 +5,7 @@
   $ja=$_POST['ja'];
   $enc=$_POST['enc'];
 
-echo($q[0]);
-
-
-$subject="\u3042";
-$decoded = preg_replace_callback('|\\\\u([0-9a-f]{4})|i', function($matched){
-  return mb_convert_encoding(pack('H*', $matched[1]), 'UTF-8', 'UTF-16');
-  }, $subject);
-echo($decoded);
+  echo($q[0]);
 
   function encode($text,$enc){
     global $q;
@@ -36,9 +29,13 @@ echo($decoded);
             $hex="";
           }
           break;
+        case "UTF-16LE":
+          if(mb_strlen($hex)>3){
+            $hex=mb_substr($hex,2,2,"UTF-8").mb_substr($hex,0,2,"UTF-8");
+          }
         case "UTF-16BE":
           if(mb_strlen($hex)>3){
-            echo(hex2bin($hex));
+            echo(preg_replace_callback('|\\\\u([0-9a-f]{4})|i', function($matched){return mb_convert_encoding(pack('H*', $matched[1]), 'UTF-8', 'UTF-16');}, "\u".$hex));
             $hex="";
           }
           break;
@@ -70,6 +67,7 @@ input
     <input type="submit" value="ウェイ化" name="yo">
     <select name="enc">
       <option>UTF-8</option>
+      <option>UTF-16LE</option>
       <option>UTF-16BE</option>
     </select>
 <br><br><br>
@@ -78,9 +76,9 @@ output
 <?php
   if($input){
     if($yo){
-      encode($input);
+      encode($input,$enc);
     }elseif($ja){
-      decode($input);
+      decode($input,$enc);
     }
   }
 ?>
