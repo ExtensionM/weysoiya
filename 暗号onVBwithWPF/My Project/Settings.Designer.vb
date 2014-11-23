@@ -80,9 +80,9 @@ Partial Friend NotInheritable Class MySettings
     <Global.System.Configuration.UserScopedSettingAttribute(),  _
      Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
      Global.System.Configuration.DefaultSettingValueAttribute("4")>  _
-    Public Property Bits() As Byte
+    Public Property Bits() As Short
         Get
-            Return CType(Me("Bits"),Byte)
+            Return CType(Me("Bits"),Short)
         End Get
         Set
             Me("Bits") = value

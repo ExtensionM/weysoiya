@@ -173,9 +173,9 @@ Public Class WeySoiya
     ''' <param name="DestPath">変更先のファイルのパス</param>
     ''' <returns>成功時に0</returns>
     ''' <remarks></remarks>
-    Public Function GetCipherFile(SrcPath As String, DestPath As String) As String
+    Public Function GetCipherFile_(SrcPath As String, DestPath As String) As String
         If (SrcPath = "" Or DestPath = "") Or (SrcPath = DestPath) Then
-            Return "書き込み先のパスと読込元のパスが不正です"
+            Return "書き込み先のパスと読み込み元のパスが不正です"
         End If
         If My.Computer.FileSystem.FileExists(SrcPath) Then
             '読み込むファイルが存在する
@@ -204,10 +204,52 @@ Public Class WeySoiya
                 Catch ex As Exception
                     Return "ファイルを開けませんでした"
                 End Try
+
+                'エンコード方式を書き込む
+                Dim EncodeCheckB = Encode.GetBytes("a")
+                If EncodeCheckB.Length = 1 Then
+                    'UTF8(00)
+                    dest.Write(Val(0))
+                    dest.Write(Val(0))
+                ElseIf EncodeCheckB.Length = 2 Then
+                    If EncodeCheckB(1) = 0 Then
+                        'UTF16リトル(01)
+                        dest.Write(Val(0))
+                        dest.Write(Val(1))
+                    Else
+                        'UTF16ビッグ(10)
+                        dest.Write(Val(1))
+                        dest.Write(Val(0))
+                    End If
+                Else
+                    'UTF32(11)
+                    dest.Write(Val(1))
+                    dest.Write(Val(1))
+                End If
+                '日付を書き込む
+
+                Dim DateByte = System.BitConverter.GetBytes(GetIntDate(Now))
+                For c As Integer = 3 To 0 Step -1
+                    Dim b As Byte = DateByte(c)
+                    For i = 0 To 7 Step Bits
+                        dest.Write(GetCipherBit(b, i))
+                    Next
+                Next
+
+
+                '元のファイル名を書き込む
+                Dim FileName As String = SrcPath.Substring(SrcPath.LastIndexOf("\") + 1)
+                Dim FileNameB = Encode.GetBytes(FileName & vbNullChar) '最後はNull文字
+                For Each b In FileNameB
+                    For i = 0 To 7 Step Bits
+                        dest.Write(GetCipherBit(b, i))
+                    Next
+                Next
+
                 Dim l As Long = 0
                 While l < src.Length
                     Dim b As Byte = src.ReadByte()
-                    For i = 0 To 7 Step bits
+                    For i = 0 To 7 Step Bits
                         dest.Write(GetCipherBit(b, i))
                     Next
                     l += 1
@@ -278,11 +320,52 @@ Public Class WeySoiya
                 Dim th As New Threading.Thread(
                            Sub()
                                Try
+                                   'エンコード方式を書き込む
+                                   Dim EncodeCheckB = Encode.GetBytes("a")
+                                   If EncodeCheckB.Length = 1 Then
+                                       'UTF8(00)
+                                       dest.Write(Val(0))
+                                       dest.Write(Val(0))
+                                   ElseIf EncodeCheckB.Length = 2 Then
+                                       If EncodeCheckB(1) = 0 Then
+                                           'UTF16リトル(01)
+                                           dest.Write(Val(0))
+                                           dest.Write(Val(1))
+                                       Else
+                                           'UTF16ビッグ(10)
+                                           dest.Write(Val(1))
+                                           dest.Write(Val(0))
+                                       End If
+                                   Else
+                                       'UTF32(11)
+                                       dest.Write(Val(1))
+                                       dest.Write(Val(1))
+                                   End If
+                                   '日付を書き込む
+
+                                   Dim DateByte = System.BitConverter.GetBytes(GetIntDate(My.Computer.FileSystem.GetFileInfo(SrcPath).CreationTime))
+                                   For c As Integer = 3 To 0 Step -1
+                                       Dim b As Byte = DateByte(c)
+                                       For i = 0 To 7 Step Bits
+                                           dest.Write(GetCipherBit(b, i))
+                                       Next
+                                   Next
+
+
+                                   '元のファイル名を書き込む
+                                   Dim FileName As String = SrcPath.Substring(SrcPath.LastIndexOf("\") + 1)
+                                   Dim FileNameB = Encode.GetBytes(FileName & vbNullChar) '最後はNull文字
+                                   For Each b In FileNameB
+                                       For i = 0 To 7 Step Bits
+                                           dest.Write(GetCipherBit(b, i))
+                                       Next
+                                   Next
+
                                    Dim l As Long = 0
                                    Result.Tasks = src.Length
                                    While l < src.Length
                                        Dim b As Byte = src.ReadByte()
-                                       For i = 0 To 7 Step bits
+                                       For i = 0 To 7 Step Bits
                                            dest.Write(GetCipherBit(b, i))
                                        Next
                                        l += 1
@@ -500,6 +583,40 @@ Public Class WeySoiya
 
     End Class
 
+    ''' <summary>
+    ''' 日付から数値の日付を取得する
+    ''' </summary>
+    ''' <param name="d">日付</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Shared Function GetIntDate(d As Date) As UInteger
+        Dim NowInt As UInteger
+        NowInt = d.Year '年
+        NowInt = d.Month - 1 + NowInt * 12 '月-1
+        NowInt = d.Day - 1 + NowInt * 31 '日-1
+        NowInt = d.Hour + NowInt * 24 '時間
+        NowInt = d.Minute + NowInt * 60
+        Return NowInt
+    End Function
+
+    ''' <summary>
+    ''' 数値の日付から日付を取得する
+    ''' </summary>
+    ''' <param name="ui">数値の日付</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Shared Function GetDate(ui As UInteger) As Date
+        Dim min As Integer = ui Mod 60
+        ui = ui \ 60
+        Dim hour As Integer = ui Mod 24
+        ui = ui \ 24
+        Dim day As Integer = (ui Mod 31) + 1
+        ui = ui \ 31
+        Dim month As Integer = (ui Mod 12) + 1
+        ui = ui \ 12
+        Dim year As Integer = ui
+        Return New Date(year, month, day, hour, min, 0)
+    End Function
 
     ''' <summary>
     ''' 長く一致しているものを返す

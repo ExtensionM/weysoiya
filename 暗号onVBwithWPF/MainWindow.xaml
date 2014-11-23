@@ -37,7 +37,7 @@
                     <TextBox x:Name="OriginText" TextWrapping="Wrap" Text="" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" AcceptsReturn="True"/>
                 </TabItem>
                 <TabItem Visibility="Collapsed">
-                    <Grid>
+                    <Grid x:Name="FileSelectGrid">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="10"/>
                             <RowDefinition Height="24"/>
@@ -45,8 +45,8 @@
                             <RowDefinition Height="24"/>
                             <RowDefinition Height="*" MinHeight="24"/>
                         </Grid.RowDefinitions>
-                        <TextBox x:Name="InputFile" Margin="0,10" Grid.Row="2"/>
-                        <TextBox x:Name="OutputFile" Margin="0,10" Grid.Row="4"/>
+                        <TextBox x:Name="PlaneFile" Margin="0,10" Grid.Row="2"/>
+                        <TextBox x:Name="WeyFile" Margin="0,10" Grid.Row="4"/>
                         <TextBlock Margin="10,0,141,0" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">入力ファイル</TextBlock>
                         <TextBlock Margin="10,0,141,0" Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Center">出力ファイル</TextBlock>
                         <Button Content="入力ファイルを選択" HorizontalAlignment="Right" Margin="0,0,10,0" Grid.Row="1" VerticalAlignment="Top" Width="126" Click="Button_Click_1"/>
@@ -59,7 +59,7 @@
                 <RadioButton x:Name="TextMode" Content="テキスト" Margin="0,0,0,0" IsChecked="True"/>
                 <RadioButton x:Name="FileMode" Content="ファイル" Margin="0,5,0,0"/>
                 <RadioButton x:Name="FolderMode" Content="フォルダ" Margin="0,5,0,0"/>
-                <CheckBox x:Name="CompressMode" Content="圧縮" Margin="0,10,0,0" IsEnabled="False"/>
+                <!--<CheckBox x:Name="CompressMode" Content="圧縮" Margin="0,10,0,0" IsEnabled="False"/>-->
                 <Button Content="設定" Margin="0,10,0,0" Click="Button_Click_4"/>
                 <!--<Button Content="ファイルを参照" Margin="0,10,0,0"/>
             <Button Content="フォルダを参照" Margin="0,5,0,0"/>-->
@@ -78,7 +78,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition/>
                 <RowDefinition/>
-                <RowDefinition Height="70"/>
+                <RowDefinition Height="44"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="185"/>
@@ -91,19 +91,14 @@
                 <sys:String>UTF16BigEndian</sys:String>
                 <sys:String>UTF32</sys:String>
             </ListBox>
-            <TextBlock HorizontalAlignment="Center" Margin="62,10,63,0" TextWrapping="Wrap" Text="文字コード" VerticalAlignment="Top" Height="18" Width="60"/>
-            <Button Content="設定終了" HorizontalAlignment="Left" Margin="10,0,0,10" VerticalAlignment="Bottom" Width="75" Click="Button_Click_5" Grid.Row="2" Height="24"/>
-            <ListBox x:Name="LanguagePreView" Grid.Column="2" HorizontalAlignment="Stretch" Margin="10,33,10,0" VerticalAlignment="Stretch" Grid.RowSpan="2"/>
-            <TextBlock Grid.Column="1" HorizontalAlignment="Center" Margin="34,10,34,0" TextWrapping="Wrap" Text="言語" VerticalAlignment="Top" Height="18" Width="24"/>
-            <ListView x:Name="Languages" Grid.Column="1" HorizontalAlignment="Stretch"  Margin="10,33,10,0" VerticalAlignment="Stretch" Grid.RowSpan="2">
+            <TextBlock HorizontalAlignment="Center" Margin="0,10,0,0" TextWrapping="Wrap" Text="文字コード" VerticalAlignment="Top" Height="18" Width="60"/>
+            <Button Content="設定終了" HorizontalAlignment="Center" Margin="0,0,0,10" VerticalAlignment="Bottom" Width="75" Click="Button_Click_5" Grid.Row="2" Height="24"/>
+            <ListBox x:Name="LanguagePreView" Grid.Column="2" HorizontalAlignment="Stretch" Margin="10,33,10,10" VerticalAlignment="Stretch" Grid.RowSpan="3"/>
+            <TextBlock Grid.Column="1" HorizontalAlignment="Center" Margin="0,10,0,0" TextWrapping="Wrap" Text="言語" VerticalAlignment="Top" Height="18" Width="24"/>
+            <ListView x:Name="Languages" Grid.Column="1" HorizontalAlignment="Stretch"  Margin="10,33,10,10" VerticalAlignment="Stretch" Grid.RowSpan="3">
 
             </ListView>
-            <TextBlock HorizontalAlignment="Center" Margin="0,10,0,0" TextWrapping="Wrap" Text="インポート・エクスポート" VerticalAlignment="Top" Grid.ColumnSpan="3" Grid.Row="2" Height="18" Width="144"/>
             <TextBlock Grid.Column="2" HorizontalAlignment="Center" Margin="0,10,0,0" TextWrapping="Wrap" Text="一覧" VerticalAlignment="Top" Height="18" Width="24"/>
-            <StackPanel HorizontalAlignment="Center" Height="24" Margin="0,0,0,10" VerticalAlignment="Bottom" Grid.ColumnSpan="3" Orientation="Horizontal" Grid.Row="2" Width="160" >
-                <Button Content="インポート" Width="75"/>
-                <Button Content="エクスポート" Width="75" Margin="10,0,0,0"/>
-            </StackPanel>
             <TextBlock HorizontalAlignment="Center" Margin="62,10,63,0" TextWrapping="Wrap" Text="パターン数" VerticalAlignment="Top" Grid.Row="1"/>
             <ListBox x:Name="Patterns" HorizontalAlignment="Stretch" Margin="10,33,10,0" VerticalAlignment="Stretch" Grid.Row="1">
             </ListBox>

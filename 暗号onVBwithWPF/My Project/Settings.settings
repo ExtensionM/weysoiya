@@ -8,7 +8,7 @@
     <Setting Name="Language" Type="System.String" Scope="User">
       <Value Profile="(Default)">WeySoiya</Value>
     </Setting>
-    <Setting Name="Bits" Type="System.Byte" Scope="User">
+    <Setting Name="Bits" Type="System.Int16" Scope="User">
       <Value Profile="(Default)">4</Value>
     </Setting>
   </Settings>

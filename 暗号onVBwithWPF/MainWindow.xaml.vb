@@ -61,41 +61,31 @@ Class MainWindow
     End Sub
 
     Public Sub Plane2WeyFile()
-        Dim t As String = Me.InputFile.Text
-        Dim t2 As String = Me.OutputFile.Text
-        Dim async = FileConvert.GetCipherFileAsync(t, t2)
+        Dim PlaneTx As String = Me.PlaneFile.Text
+        Dim WeyTx As String = Me.WeyFile.Text
+        Dim async = FileConvert.GetCipherFileAsync(PlaneTx, WeyTx)
         If async.ErrorState Then
             MsgBox(async.ErrorMessage)
         Else
             Me.CipherMode.IsEnabled = False
-            AddHandler FileConvert.EndedEvent,
-                Sub(sender As WeySoiya, e As WeySoiya.AsyncResultEventArgs)
-                    Me.CipherMode.Dispatcher.Invoke(Sub() Me.CipherMode.IsEnabled = True)
-                    MsgBox("Ended")
-                End Sub
-            AddHandler FileConvert.ErrorEvent,
-                Sub(sender As WeySoiya, e As WeySoiya.AsyncResultEventArgs, ex As Exception)
-                    Me.CipherMode.Dispatcher.Invoke(Sub() Me.CipherMode.IsEnabled = True)
-                    MsgBox(ex.Message)
-                End Sub
         End If
 
     End Sub
 
     Public Sub Wey2TextFile()
-        Dim t2 As String = Me.OutputFile.Text
-        Dim t As String = Me.InputFile.Text
-        If My.Computer.FileSystem.FileExists(t) Then
-            If t2 <> "" Then
-                If My.Computer.FileSystem.FileExists(t2) Then
+        Dim PlaneTx As String = Me.PlaneFile.Text
+        Dim WeyTx As String = Me.WeyFile.Text
+        If My.Computer.FileSystem.FileExists(WeyTx) Then
+            If PlaneTx <> "" Then
+                If My.Computer.FileSystem.FileExists(PlaneTx) Then
                     If MsgBox("指定されたファイルは既に存在します。" & vbNewLine & "上書きしますか", vbYesNo) = MsgBoxResult.Yes Then
-                        Dim b As Byte() = FileConvert.GetPlainBytes(System.IO.File.ReadAllText(t))
-                        System.IO.File.WriteAllBytes(t2, b)
+                        Dim b As Byte() = FileConvert.GetPlainBytes(System.IO.File.ReadAllText(WeyTx))
+                        System.IO.File.WriteAllBytes(PlaneTx, b)
                     End If
                 Else
-                    If (My.Computer.FileSystem.DirectoryExists(t2.Substring(0, t2.LastIndexOf("\")))) Then
-                        Dim b As Byte() = FileConvert.GetPlainBytes(System.IO.File.ReadAllText(t))
-                        System.IO.File.WriteAllBytes(t2, b)
+                    If (My.Computer.FileSystem.DirectoryExists(PlaneTx.Substring(0, PlaneTx.LastIndexOf("\")))) Then
+                        Dim b As Byte() = FileConvert.GetPlainBytes(System.IO.File.ReadAllText(WeyTx))
+                        System.IO.File.WriteAllBytes(PlaneTx, b)
                     Else
                         MsgBox("ディレクトリが見つかりません")
                     End If
@@ -132,7 +122,7 @@ Class MainWindow
         Dim Dialog As New Microsoft.Win32.OpenFileDialog
         Dialog.InitialDirectory = My.Application.Info.DirectoryPath
         If Dialog.ShowDialog() Then
-            Me.InputFile.Text = Dialog.FileName
+            Me.PlaneFile.Text = Dialog.FileName
         End If
     End Sub
 
@@ -144,7 +134,7 @@ Class MainWindow
         Dialog.OverwritePrompt = False
         Dialog.InitialDirectory = My.Application.Info.DirectoryPath
         If Dialog.ShowDialog() Then
-            Me.OutputFile.Text = Dialog.FileName
+            Me.WeyFile.Text = Dialog.FileName
         End If
     End Sub
 
@@ -169,7 +159,7 @@ Class MainWindow
                 My.Settings.Encoding = Me.EncordType.SelectedIndex
                 For i As Integer = 0 To .TextSets.Count - 1
                     If (.TextSets(i).Name = Me.Languages.SelectedValue) And
-                        Convert.ToByte(CType(Me.Patterns.SelectedValue, String).Substring(0, 3)) =
+                        Convert.ToInt16(CType(Me.Patterns.SelectedValue, String).Substring(0, 3)) =
                         .TextSets(i).Strings.Count Then
                         .SettingNo = i
                         My.Settings.Bits = .TextSets(.SettingNo).Bits
@@ -285,12 +275,22 @@ Class MainWindow
         WeySoiya.Setting.SetEncoding(Me.EncordType.SelectedIndex)
         For i As Integer = 0 To WeySoiya.Setting.TextSets.Count - 1
             If (WeySoiya.Setting.TextSets(i).Name = Me.Languages.SelectedValue) And
-                Convert.ToByte(CType(Me.Patterns.SelectedValue, String).Substring(0, 3)) =
+                Convert.ToInt16(CType(Me.Patterns.SelectedValue, String).Substring(0, 3)) =
                 WeySoiya.Setting.TextSets(i).Strings.Count Then
                 WeySoiya.Setting.SettingNo = i
             End If
         Next
 
+        AddHandler FileConvert.EndedEvent,
+            Sub(senderE As WeySoiya, eE As WeySoiya.AsyncResultEventArgs)
+                Me.CipherMode.Dispatcher.Invoke(Sub() Me.CipherMode.IsEnabled = True)
+                MsgBox("Ended")
+            End Sub
+        AddHandler FileConvert.ErrorEvent,
+            Sub(senderE As WeySoiya, eE As WeySoiya.AsyncResultEventArgs, ex As Exception)
+                Me.CipherMode.Dispatcher.Invoke(Sub() Me.CipherMode.IsEnabled = True)
+                MsgBox(ex.Message)
+            End Sub
 
     End Sub
 
@@ -380,7 +380,7 @@ Class MainWindow
             .Items.Clear()
             For Each ts In WeySoiya.Setting.TextSets
                 If (Me.Languages.SelectedValue = ts.Name) AndAlso
-                    (Convert.ToByte(CType(Me.Patterns.SelectedValue, String).Substring(0, 3)) = ts.Strings.Count) Then
+                    (Convert.ToInt16(CType(Me.Patterns.SelectedValue, String).Substring(0, 3)) = ts.Strings.Count) Then
                     For Each st In ts.Strings
                         .Items.Add(st)
                     Next
