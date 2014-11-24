@@ -21,6 +21,8 @@ Public Class WeySoiya
 
     Public Event EndedEvent(ByVal sender As WeySoiya, ByVal e As AsyncResultEventArgs)
 
+    Public Event ProgressEvent(ByVal sender As WeySoiya, ByVal e As AsyncProgressEventArgs)
+
     Public Event ErrorEvent(ByVal sender As WeySoiya, ByVal e As AsyncResultEventArgs, ByVal ex As Exception)
 
     Public Shared Setting As New WeySoiyaSettings
@@ -173,7 +175,7 @@ Public Class WeySoiya
     ''' <param name="DestPath">変更先のファイルのパス</param>
     ''' <returns>成功時に0</returns>
     ''' <remarks></remarks>
-    Public Function GetCipherFile_(SrcPath As String, DestPath As String) As String
+    Public Function GetCipherFile(SrcPath As String, DestPath As String) As String
         If (SrcPath = "" Or DestPath = "") Or (SrcPath = DestPath) Then
             Return "書き込み先のパスと読み込み元のパスが不正です"
         End If
@@ -226,6 +228,7 @@ Public Class WeySoiya
                     dest.Write(Val(1))
                     dest.Write(Val(1))
                 End If
+
                 '日付を書き込む
 
                 Dim DateByte = System.BitConverter.GetBytes(GetIntDate(Now))
@@ -273,10 +276,12 @@ Public Class WeySoiya
     ''' </summary>
     ''' <param name="SrcPath">読み取り元のパス</param>
     ''' <param name="DestPath">書き込み先のパス</param>
+    ''' <param name="interval">進捗を示すイベントを起こす間隔</param>
     ''' <returns>書き込み結果のオブジェクト</returns>
     ''' <remarks>書き込み終了時、エラー時にイベントを起こします</remarks>
-    Public Function GetCipherFileAsync(SrcPath As String, DestPath As String) As AsyncResult
+    Public Function GetCipherFileAsync(SrcPath As String, DestPath As String, Optional interval As Long = 100) As AsyncResult
         Dim Result = New AsyncResult
+
         If (SrcPath = "" Or DestPath = "") Or (SrcPath = DestPath) Then
             Result.ErrorMessage = "書き込み先のパスと読込元のパスが不正です"
             Result.ErrorState = True
@@ -319,6 +324,12 @@ Public Class WeySoiya
                 End Try
                 Dim th As New Threading.Thread(
                            Sub()
+                               Dim Progress As New AsyncProgressEventArgs(Result)
+                               Dim sw As New Stopwatch
+                               Dim mill As Long = 0
+                               Dim swTemp As Long = 0
+
+                               sw.Start()
                                Try
                                    'エンコード方式を書き込む
                                    Dim EncodeCheckB = Encode.GetBytes("a")
@@ -370,12 +381,21 @@ Public Class WeySoiya
                                        Next
                                        l += 1
                                        Result.Progress = l
+                                       swTemp = sw.ElapsedMilliseconds
+                                       If swTemp > mill Then
+                                           mill = swTemp + interval
+                                           Progress.MillSecond = swTemp
+                                           RaiseEvent ProgressEvent(Me, Progress)
+                                       End If
                                    End While
                                    src.Close()
                                    dest.Close()
                                    src.Dispose()
                                    dest.Dispose()
                                    Result.Ended = True
+                                   sw.Stop()
+                                   Progress.MillSecond = sw.ElapsedMilliseconds
+                                   RaiseEvent ProgressEvent(Me, Progress)
                                    RaiseEvent EndedEvent(Me, New AsyncResultEventArgs(SrcPath, DestPath))
                                    Return
                                Catch ex As Exception
@@ -463,9 +483,14 @@ Public Class WeySoiya
     '    Return ""
     'End Function
 
+
+    ''' <summary>
+    ''' 非同期書き込みの実行中の結果を取得するためのクラス
+    ''' </summary>
+    ''' <remarks></remarks>
     Public Class AsyncResult
 
-        Private Ended_ As Boolean
+        Private Ended_ As Boolean = False
         ''' <summary>
         ''' 終了状態
         ''' </summary>
@@ -481,7 +506,7 @@ Public Class WeySoiya
             End Set
         End Property
 
-        Private ErrorMessage_ As String
+        Private ErrorMessage_ As String = ""
         ''' <summary>
         ''' エラーメッセージ
         ''' </summary>
@@ -497,7 +522,7 @@ Public Class WeySoiya
             End Set
         End Property
 
-        Private Progress_ As Long
+        Private Progress_ As Long = 0
         ''' <summary>
         ''' 変換し終わった量
         ''' </summary>
@@ -513,7 +538,7 @@ Public Class WeySoiya
             End Set
         End Property
 
-        Private Tasks_ As Long
+        Private Tasks_ As Long = 0
         ''' <summary>
         ''' 変換する量
         ''' </summary>
@@ -529,7 +554,7 @@ Public Class WeySoiya
             End Set
         End Property
 
-        Private ErrorState_ As Boolean
+        Private ErrorState_ As Boolean = False
         ''' <summary>
         ''' エラーの状態
         ''' </summary>
@@ -547,6 +572,10 @@ Public Class WeySoiya
 
     End Class
 
+    ''' <summary>
+    ''' 非同期書き込みの終了時のイベントデータ
+    ''' </summary>
+    ''' <remarks></remarks>
     Public Class AsyncResultEventArgs
         Inherits EventArgs
         Private SourcePath_ As String
@@ -579,6 +608,48 @@ Public Class WeySoiya
             SourcePath_ = Src
             DestinationPath_ = Dest
         End Sub
+
+
+    End Class
+
+    ''' <summary>
+    ''' 非同期処理においてタスクの進捗が伸びた時のデータ
+    ''' </summary>
+    ''' <remarks></remarks>
+    Public Class AsyncProgressEventArgs
+        Inherits EventArgs
+
+        Private Result_ As AsyncResult
+
+        Public Sub New(ByRef AsyncRes As AsyncResult)
+            Result_ = AsyncRes
+        End Sub
+
+        Public ReadOnly Property Result As AsyncResult
+            Get
+                Return Result_
+            End Get
+        End Property
+
+        Public Shared Widening Operator CType(val As AsyncProgressEventArgs) As AsyncResult
+            Return val.Result_
+        End Operator
+
+        Private MillSecond_ As Long
+        ''' <summary>
+        ''' 経過したミリ秒
+        ''' </summary>
+        ''' <value></value>
+        ''' <returns></returns>
+        ''' <remarks></remarks>
+        Public Property MillSecond() As Long
+            Get
+                Return MillSecond_
+            End Get
+            Set(ByVal value As Long)
+                MillSecond_ = value
+            End Set
+        End Property
 
 
     End Class
@@ -652,7 +723,6 @@ Public Class WeySoiya
         Next
         Return -1
     End Function
-
 
 
 

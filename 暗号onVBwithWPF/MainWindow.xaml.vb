@@ -61,13 +61,16 @@ Class MainWindow
     End Sub
 
     Public Sub Plane2WeyFile()
+        Me.MsgTextBlock1.Text = "変換開始"
         Dim PlaneTx As String = Me.PlaneFile.Text
         Dim WeyTx As String = Me.WeyFile.Text
         Dim async = FileConvert.GetCipherFileAsync(PlaneTx, WeyTx)
         If async.ErrorState Then
             MsgBox(async.ErrorMessage)
+            Me.MsgTextBlock1.Text = "変換中止"
         Else
             Me.CipherMode.IsEnabled = False
+            Me.MsgTextBlock1.Text = "変換中"
         End If
 
     End Sub
@@ -284,12 +287,18 @@ Class MainWindow
         AddHandler FileConvert.EndedEvent,
             Sub(senderE As WeySoiya, eE As WeySoiya.AsyncResultEventArgs)
                 Me.CipherMode.Dispatcher.Invoke(Sub() Me.CipherMode.IsEnabled = True)
-                MsgBox("Ended")
+                Me.MsgTextBlock1.Dispatcher.Invoke(Sub() Me.MsgTextBlock1.Text = "変換終了")
             End Sub
         AddHandler FileConvert.ErrorEvent,
             Sub(senderE As WeySoiya, eE As WeySoiya.AsyncResultEventArgs, ex As Exception)
                 Me.CipherMode.Dispatcher.Invoke(Sub() Me.CipherMode.IsEnabled = True)
                 MsgBox(ex.Message)
+            End Sub
+        AddHandler FileConvert.ProgressEvent,
+            Sub(senderE As WeySoiya, eE As WeySoiya.AsyncProgressEventArgs)
+                Dim per As Double = If(eE.Result.Tasks = 0, 1, eE.Result.Progress / eE.Result.Tasks)
+                Me.Progress.Dispatcher.Invoke(Sub() Me.Progress.Value = per)
+                Me.MsgTextBlock2.Dispatcher.Invoke(Sub() Me.MsgTextBlock2.Text = String.Format("{0:N0} / {1:N0} Bytes -{2,8:P2}", eE.Result.Progress, eE.Result.Tasks, per))
             End Sub
 
     End Sub
