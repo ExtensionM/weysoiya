@@ -76,27 +76,39 @@ Class MainWindow
     End Sub
 
     Public Sub Wey2TextFile()
+        Me.MsgTextBlock1.Text = "変換開始"
         Dim PlaneTx As String = Me.PlaneFile.Text
         Dim WeyTx As String = Me.WeyFile.Text
-        If My.Computer.FileSystem.FileExists(WeyTx) Then
-            If PlaneTx <> "" Then
-                If My.Computer.FileSystem.FileExists(PlaneTx) Then
-                    If MsgBox("指定されたファイルは既に存在します。" & vbNewLine & "上書きしますか", vbYesNo) = MsgBoxResult.Yes Then
-                        Dim b As Byte() = FileConvert.GetPlainBytes(System.IO.File.ReadAllText(WeyTx))
-                        System.IO.File.WriteAllBytes(PlaneTx, b)
-                    End If
-                Else
-                    If (My.Computer.FileSystem.DirectoryExists(PlaneTx.Substring(0, PlaneTx.LastIndexOf("\")))) Then
-                        Dim b As Byte() = FileConvert.GetPlainBytes(System.IO.File.ReadAllText(WeyTx))
-                        System.IO.File.WriteAllBytes(PlaneTx, b)
-                    Else
-                        MsgBox("ディレクトリが見つかりません")
-                    End If
-                End If
-            End If
+        Dim async = FileConvert.GetPlaneFileAsync(WeyTx, PlaneTx)
+        If async.ErrorState Then
+            MsgBox(async.ErrorMessage)
+            Me.MsgTextBlock1.Text = "変換中止"
         Else
-            MsgBox("ファイルが見つかりません")
+            Me.CipherMode.IsEnabled = False
+            Me.MsgTextBlock1.Text = "変換中"
         End If
+
+        'Dim PlaneTx As String = Me.PlaneFile.Text
+        'Dim WeyTx As String = Me.WeyFile.Text
+        'If My.Computer.FileSystem.FileExists(WeyTx) Then
+        '    If PlaneTx <> "" Then
+        '        If My.Computer.FileSystem.FileExists(PlaneTx) Then
+        '            If MsgBox("指定されたファイルは既に存在します。" & vbNewLine & "上書きしますか", vbYesNo) = MsgBoxResult.Yes Then
+        '                Dim b As Byte() = FileConvert.GetPlainBytes(System.IO.File.ReadAllText(WeyTx))
+        '                System.IO.File.WriteAllBytes(PlaneTx, b)
+        '            End If
+        '        Else
+        '            If (My.Computer.FileSystem.DirectoryExists(PlaneTx.Substring(0, PlaneTx.LastIndexOf("\")))) Then
+        '                Dim b As Byte() = FileConvert.GetPlainBytes(System.IO.File.ReadAllText(WeyTx))
+        '                System.IO.File.WriteAllBytes(PlaneTx, b)
+        '            Else
+        '                MsgBox("ディレクトリが見つかりません")
+        '            End If
+        '        End If
+        '    End If
+        'Else
+        '    MsgBox("ファイルが見つかりません")
+        'End If
 
     End Sub
 
@@ -298,7 +310,7 @@ Class MainWindow
             Sub(senderE As WeySoiya, eE As WeySoiya.AsyncProgressEventArgs)
                 Dim per As Double = If(eE.Result.Tasks = 0, 1, eE.Result.Progress / eE.Result.Tasks)
                 Me.Progress.Dispatcher.Invoke(Sub() Me.Progress.Value = per)
-                Me.MsgTextBlock2.Dispatcher.Invoke(Sub() Me.MsgTextBlock2.Text = String.Format("{0:N0} / {1:N0} Bytes -{2,8:P2}", eE.Result.Progress, eE.Result.Tasks, per))
+                Me.MsgTextBlock2.Dispatcher.Invoke(Sub() Me.MsgTextBlock2.Text = String.Format("{0:N0} / {1:N0} " & eE.Result.Progress.ToString & " -{2,8:P2}", eE.Result.Progress, eE.Result.Tasks, per))
             End Sub
 
     End Sub

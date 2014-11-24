@@ -176,7 +176,10 @@ Public Class WeySoiya
     ''' <returns>成功時に0</returns>
     ''' <remarks></remarks>
     Public Function GetCipherFile(SrcPath As String, DestPath As String) As String
-        If (SrcPath = "" Or DestPath = "") Or (SrcPath = DestPath) Then
+        If (SrcPath = "" Or DestPath = "") Then
+            Return "書き込み先のパスか読み込み元のパスが不正です"
+        End If
+        If (SrcPath = DestPath) Then
             Return "書き込み先のパスと読み込み元のパスが不正です"
         End If
         If My.Computer.FileSystem.FileExists(SrcPath) Then
@@ -276,14 +279,18 @@ Public Class WeySoiya
     ''' </summary>
     ''' <param name="SrcPath">読み取り元のパス</param>
     ''' <param name="DestPath">書き込み先のパス</param>
-    ''' <param name="interval">進捗を示すイベントを起こす間隔</param>
+    ''' <param name="Interval">進捗を示すイベントを起こす間隔</param>
     ''' <returns>書き込み結果のオブジェクト</returns>
     ''' <remarks>書き込み終了時、エラー時にイベントを起こします</remarks>
-    Public Function GetCipherFileAsync(SrcPath As String, DestPath As String, Optional interval As Long = 100) As AsyncResult
+    Public Function GetCipherFileAsync(SrcPath As String, DestPath As String, Optional Interval As Long = 100) As AsyncResult
         Dim Result = New AsyncResult
-
-        If (SrcPath = "" Or DestPath = "") Or (SrcPath = DestPath) Then
-            Result.ErrorMessage = "書き込み先のパスと読込元のパスが不正です"
+        If (SrcPath = "" Or DestPath = "") Then
+            Result.ErrorMessage = "書き込み先のパスか読み込み元のパスが不正です"
+            Result.ErrorState = True
+            Return Result
+        End If
+        If (SrcPath = DestPath) Then
+            Result.ErrorMessage = "書き込み先のパスと読み込み元のパスが不正です"
             Result.ErrorState = True
             Return Result
         End If
@@ -383,7 +390,7 @@ Public Class WeySoiya
                                        Result.Progress = l
                                        swTemp = sw.ElapsedMilliseconds
                                        If swTemp > mill Then
-                                           mill = swTemp + interval
+                                           mill = swTemp + Interval
                                            Progress.MillSecond = swTemp
                                            RaiseEvent ProgressEvent(Me, Progress)
                                        End If
@@ -423,6 +430,122 @@ Public Class WeySoiya
             Return Result
         End If
 
+        Return Result
+    End Function
+
+    ''' <summary>
+    ''' 暗号化されたテキストを読み取り元のファイルに変換する
+    ''' </summary>
+    ''' <param name="SrcPath">読み取り元のファイル</param>
+    ''' <param name="DesrPath">書き込み先のファイル(空白の場合も元のファイル名を使用する)</param>
+    ''' <param name="Interval">イベントの起こる最小間隔(MillSec)</param>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Function GetPlaneFileAsync(SrcPath As String, Optional DestPath As String = "", Optional Interval As Long = 100) As AsyncResult
+        Dim Result As New AsyncResult
+        If SrcPath = "" Then
+            Result.ErrorMessage = "読み込み元のファイルが不正です"
+            Result.ErrorState = True
+            Return Result
+        End If
+        If (SrcPath = DestPath) Then
+            Result.ErrorMessage = "書き込み先のパスと読込元のパスが不正です"
+            Result.ErrorState = True
+            Return Result
+        End If
+
+        If My.Computer.FileSystem.FileExists(SrcPath) Then
+            '読み込み元のファイルが存在する
+            Try
+                Dim Encode As Text.Encoding = Nothing
+                Dim 
+                Using SrcStream As New IO.FileStream(SrcPath, IO.FileMode.Open, IO.FileAccess.Read)
+                    Dim EncodedBytes(3, 1)() As Byte
+                    EncodedBytes(0, 0) = Text.Encoding.UTF8.GetBytes(Val(0) + Val(0))
+                    EncodedBytes(0, 1) = {&HEF, &HBB, &HBF}
+                    EncodedBytes(1, 0) = Text.Encoding.Unicode.GetBytes(Val(0) + Val(1))
+                    EncodedBytes(1, 1) = {&HFF, &HFE}
+                    EncodedBytes(2, 0) = Text.Encoding.BigEndianUnicode.GetBytes(Val(1) + Val(0))
+                    EncodedBytes(2, 1) = {&HFE, &HFF}
+                    EncodedBytes(3, 0) = Text.Encoding.UTF32.GetBytes(Val(1) + Val(1))
+                    EncodedBytes(3, 1) = {&HFF, &HFE, &H0, &H0}
+                    Dim IsTrue(,) As Boolean = {{True, True}, {True, True}, {True, True}, {True, True}}
+                    Dim EndOfBytes(,) As Boolean = {{False, False}, {False, False}, {False, False}, {False, False}}
+                    Dim l As Long = 0
+                    Dim c As Integer
+                    While True
+                        Dim b As Byte
+                        b = SrcStream.ReadByte()
+                        For i As Integer = 0 To 3
+                            For j As Integer = 0 To 1
+                                If Not EndOfBytes(i, j) Then
+                                    If EncodedBytes(i, j)(l) <> b Then
+                                        IsTrue(i, j) = False
+                                        EndOfBytes(i, j) = True
+                                        c += 1
+                                    ElseIf ((EncodedBytes(i, j).Length - 1) = l) Then
+                                        EndOfBytes(i, j) = True
+                                        c += 1
+                                    End If
+                                End If
+                            Next
+                        Next
+                        If c = 8 Then
+                            Exit While
+                        End If
+                        l += 1
+                    End While
+                    Dim len As Integer = 0
+                    Dim EncodeReusult As Integer = -1
+
+                    For i As Integer = 0 To 3
+                        For j As Integer = 0 To 1
+                            If IsTrue(i, j) Then
+                                If EncodedBytes(i, j).Length > len Then
+                                    EncodeReusult = i
+                                    len = EncodedBytes(i, j).Length
+                                End If
+                            End If
+                        Next
+                    Next
+                    Result.ErrorMessage = EncodeReusult
+                    Select Case EncodeReusult
+                        Case 0
+                            Encode = Text.Encoding.UTF8
+                        Case 1
+                            Encode = Text.Encoding.Unicode
+                        Case 2
+                            Encode = Text.Encoding.BigEndianUnicode
+                        Case 3
+                            Encode = Text.Encoding.UTF32
+                        Case Else
+                            Encode = Nothing
+                    End Select
+                    SrcStream.Close()
+                End Using
+
+            Catch ex As Exception
+                Result.ErrorMessage = ex.Message
+                Return Result
+            End Try
+
+
+            Result.ErrorState = True
+            Return Result
+
+            Dim Dest As IO.FileStream = Nothing
+
+
+        Else
+            '読み込み元のファイルが存在しない
+            Result.ErrorMessage = "読み込み元のファイルが存在しません"
+            Result.ErrorState = True
+            Return Result
+        End If
+
+
+        Result.ErrorMessage = "Err"
+        Result.ErrorState = True
         Return Result
     End Function
 
@@ -569,6 +692,22 @@ Public Class WeySoiya
                 ErrorState_ = value
             End Set
         End Property
+
+        Private TaskType_ As TaskTypeEnum = TaskTypeEnum.Bytes
+        Public Property TaskType() As TaskTypeEnum
+            Get
+                Return TaskType_
+            End Get
+            Set(ByVal value As TaskTypeEnum)
+                TaskType_ = value
+            End Set
+        End Property
+
+        Public Enum TaskTypeEnum As Byte
+            Bytes
+            Words
+        End Enum
+
 
     End Class
 

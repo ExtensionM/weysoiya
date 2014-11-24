@@ -74,7 +74,7 @@
 
 
         </Grid>
-        <Grid x:Name="SettingGrid" Grid.Column="1" Margin="0,0,-462,0">
+        <Grid x:Name="SettingGrid" Grid.Column="1" Width="{Binding ActualWidth, ElementName=ParentGrid, Mode=OneWay}" Margin="0,0,0,0">
             <Grid.RowDefinitions>
                 <RowDefinition/>
                 <RowDefinition/>
@@ -105,12 +105,12 @@
 
 
         </Grid>
-        <Grid HorizontalAlignment="Stretch" Grid.Row="1" VerticalAlignment="Stretch" Background="#FFF1EDED" Margin="0,1,0,0">
+        <Grid HorizontalAlignment="Stretch" Grid.Row="1" Grid.ColumnSpan="2" VerticalAlignment="Stretch" Background="#FFF1EDED" Margin="0,1,0,0">
             <TextBlock x:Name="MsgTextBlock1" HorizontalAlignment="Left" Margin="10,0,0,0" TextWrapping="Wrap" VerticalAlignment="Center"/>
             <TextBlock x:Name="MsgTextBlock2" HorizontalAlignment="Right" Margin="0,0,120,0" TextWrapping="Wrap" VerticalAlignment="Center" FontFamily="Courier New"></TextBlock>
             <ProgressBar x:Name="Progress" HorizontalAlignment="Right" Height="14" Margin="0,0,10,0" VerticalAlignment="Center" Width="100" Maximum="1"/>
 
         </Grid>
-        <Rectangle Fill="#FF919191" HorizontalAlignment="Stretch" Grid.Row="1" VerticalAlignment="Top" StrokeThickness="0" Height="1"/>
+        <Rectangle Fill="#FF919191" HorizontalAlignment="Stretch" Grid.Row="1" Grid.ColumnSpan="2" VerticalAlignment="Top" StrokeThickness="0" Height="1"/>
     </Grid>
 </Window>
