@@ -1,6 +1,6 @@
 <?php
   $q=file(dirname(__FILE__).'/weysoiya4.wss',FILE_IGNORE_NEW_LINES);
-  $input=$_POST['wey'];
+  $input=$_POST['wey'];//comment
   $yo=$_POST['yo'];
   $ja=$_POST['ja'];
   $enc=$_POST['enc'];
