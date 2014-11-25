@@ -137,6 +137,15 @@
       <LastGenOutput>Resources.Designer.vb</LastGenOutput>
       <CustomToolNamespace>My.Resources</CustomToolNamespace>
     </EmbeddedResource>
+    <None Include="bin\Debug\WeySoiyaSettings\01.wss" />
+    <None Include="bin\Debug\WeySoiyaSettings\Space.wss" />
+    <None Include="bin\Debug\WeySoiyaSettings\w.wss" />
+    <None Include="bin\Debug\WeySoiyaSettings\WeySoiya1.wss" />
+    <None Include="bin\Debug\WeySoiyaSettings\WeySoiya2.wss" />
+    <None Include="bin\Debug\WeySoiyaSettings\WeySoiya4 - コピー %282%29.wss" />
+    <None Include="bin\Debug\WeySoiyaSettings\WeySoiya4 - コピー.wss" />
+    <None Include="bin\Debug\WeySoiyaSettings\WeySoiya4.wss" />
+    <None Include="bin\Debug\WeySoiyaSettings\機械科.wss" />
     <None Include="My Project\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.vb</LastGenOutput>
