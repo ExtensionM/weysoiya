@@ -11,7 +11,16 @@
     global $q;
     for($i=0;$i<mb_strlen($text,"UTF-8");$i++){
       $hex=bin2hex(mb_convert_encoding(mb_substr($text,$i,1,"UTF-8"),$enc,"UTF-8"));
-      for($j=0;$j<8;$j++){
+      switch($enc){
+        case "UTF-8":
+          $leng=8;
+          break;
+        case "UTF-16LE":
+        case "UTF-16BE":
+          $leng=4;
+          break;
+      }
+      for($j=0;$j<$leng;$j++){
         echo($q[hexdec(mb_substr($hex,$j,1,"UTF-8"))+1]);
       }
     }
@@ -24,7 +33,8 @@
       $hex.=dechex(array_search(mb_substr($text,$i*3,3,"UTF-8"),$q)-1);
       switch($enc){
         case "UTF-8":
-          if(mb_strlen($hex)>5){
+          if(mb_strlen($hex)>7){
+            $hex=str_replace("00","",$hex);
             echo(hex2bin($hex));
             $hex="";
           }
