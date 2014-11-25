@@ -437,7 +437,7 @@ Public Class WeySoiya
     ''' 暗号化されたテキストを読み取り元のファイルに変換する
     ''' </summary>
     ''' <param name="SrcPath">読み取り元のファイル</param>
-    ''' <param name="DesrPath">書き込み先のファイル(空白の場合も元のファイル名を使用する)</param>
+    ''' <param name="DestPath">書き込み先のファイル(空白の場合も元のファイル名を使用する)</param>
     ''' <param name="Interval">イベントの起こる最小間隔(MillSec)</param>
     ''' <returns></returns>
     ''' <remarks></remarks>
@@ -458,7 +458,6 @@ Public Class WeySoiya
             '読み込み元のファイルが存在する
             Try
                 Dim Encode As Text.Encoding = Nothing
-                Dim 
                 Using SrcStream As New IO.FileStream(SrcPath, IO.FileMode.Open, IO.FileAccess.Read)
                     Dim EncodedBytes(3, 1)() As Byte
                     EncodedBytes(0, 0) = Text.Encoding.UTF8.GetBytes(Val(0) + Val(0))
@@ -519,8 +518,14 @@ Public Class WeySoiya
                         Case 3
                             Encode = Text.Encoding.UTF32
                         Case Else
-                            Encode = Nothing
+                            Result.ErrorMessage = "読み取り元のエンコード方式が不正です"
+                            Return Result
                     End Select
+
+                    Dim SrcStreamReader As New IO.StreamReader(SrcStream, Encode)
+                    'SrcStreamReader.
+                    'Dim Dest As IO.FileStream = Nothing
+
                     SrcStream.Close()
                 End Using
 
@@ -533,7 +538,6 @@ Public Class WeySoiya
             Result.ErrorState = True
             Return Result
 
-            Dim Dest As IO.FileStream = Nothing
 
 
         Else
@@ -641,6 +645,11 @@ Public Class WeySoiya
                 Return ErrorMessage_
             End Get
             Set(ByVal value As String)
+                If value = "" Then
+                    ErrorState = False
+                Else
+                    ErrorState = True
+                End If
                 ErrorMessage_ = value
             End Set
         End Property
